@@ -182,24 +182,38 @@ function restoreLocal(){
 
 /* GITHUB SYNC */
 function syncMenuGithub(){
-  if(!confirm("Menu lama akan ditimpa"))return
+  if(!confirm("Menu lama akan ditimpa")) return
+
   fetch(GITHUB_MENU_URL)
-    .then(r=>r.text())
+    .then(r=>{
+      if(!r.ok) throw new Error("CSV tidak ditemukan")
+      return r.text()
+    })
     .then(csv=>{
-      const rows=csv.split("\n")
-      const s=db.transaction("menu","readwrite").objectStore("menu")
-      s.clear()
+      const rows = csv.trim().split("\n")
+      const store = db.transaction("menu","readwrite").objectStore("menu")
+      store.clear()
+
       for(let i=1;i<rows.length;i++){
-        const [n,k,h]=rows[i].split(",")
-        if(n&&h)s.add({
-          nama:n.trim(),
-          kategori:(k||"Makanan").trim(),
-          harga:+h,
+        const cols = rows[i].split(",").map(c=>c.trim())
+        if(cols.length < 3) continue
+
+        const [nama,kategori,harga] = cols
+        if(!nama || !harga) continue
+
+        store.add({
+          nama,
+          kategori: kategori || "Makanan",
+          harga: Number(harga),
           favorit:false
         })
       }
+
       loadMenu()
-      toast("Menu sync berhasil")
+      toast("Menu berhasil sync dari GitHub")
+    })
+    .catch(err=>{
+      alert("Sync gagal: "+err.message)
     })
 }
 
