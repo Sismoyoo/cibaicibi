@@ -248,41 +248,56 @@ function restoreLocal() {
 }
 
 // ====== SYNC MENU GITHUB (FINAL FIX) ======
-function syncMenuGithub(silent = false) {
-  if (!silent && !confirm("Menu lama akan ditimpa")) return
+function waitForDB(cb){
+  if(db){
+    cb()
+  } else {
+    setTimeout(()=>waitForDB(cb),100)
+  }
+}
 
-  menu = []
-  menuList.innerHTML = ""
+function syncMenuGithub(silent = false){
+  if(!silent && !confirm("Menu lama akan ditimpa")) return
 
-  fetch(GITHUB_MENU_URL)
-    .then(r => {
-      if (!r.ok) throw new Error("CSV tidak ditemukan")
-      return r.text()
-    })
-    .then(csv => {
-      const rows = csv.trim().split("\n")
-      const store = db.transaction("menu", "readwrite").objectStore("menu")
-      store.clear()
+  waitForDB(() => {
 
-      for (let i = 1; i < rows.length; i++) {
-        const cols = rows[i].split(",").map(c => c.trim())
-        if (cols.length < 3) continue
-        const [nama, kategori, harga] = cols
-        if (!nama || !harga) continue
+    menu = []
+    menuList.innerHTML = ""
 
-        store.add({
-          nama,
-          kategori: kategori || "Makanan",
-          harga: Number(harga),
-          favorit: false
-        })
-      }
+    fetch(GITHUB_MENU_URL)
+      .then(r=>{
+        if(!r.ok) throw new Error("CSV tidak ditemukan")
+        return r.text()
+      })
+      .then(csv=>{
+        const rows = csv.trim().split("\n")
+        const store = db.transaction("menu","readwrite").objectStore("menu")
+        store.clear()
 
-      loadMenu()
-      setTimeout(loadMenu, 300)
-      if (!silent) toast("Menu berhasil sync dari GitHub")
-    })
-    .catch(err => alert("Sync gagal: " + err.message))
+        for(let i=1;i<rows.length;i++){
+          const cols = rows[i].split(",").map(c=>c.trim())
+          if(cols.length < 3) continue
+
+          const [nama,kategori,harga] = cols
+          if(!nama || !harga) continue
+
+          store.add({
+            nama,
+            kategori: kategori || "Makanan",
+            harga: Number(harga),
+            favorit:false
+          })
+        }
+
+        loadMenu()
+        setTimeout(loadMenu,300)
+        if(!silent) toast("Menu berhasil sync dari GitHub")
+      })
+      .catch(err=>{
+        alert("Sync gagal: " + err.message)
+      })
+
+  })
 }
 
 // ====== DARK MODE ======
