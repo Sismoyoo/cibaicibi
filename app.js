@@ -1,255 +1,198 @@
-let db,chart7hari
-let menu=[],keranjang=[],dipilih=null
+let db, chart
+let menu=[], keranjang=[], dipilih=null
 
-const req=indexedDB.open("cibaicibi_db",4)
+const GITHUB_MENU_URL = "ISI_URL_RAW_CSV_GITHUB"
+
+const req=indexedDB.open("cibaicibi_db",6)
 req.onupgradeneeded=e=>{
-db=e.target.result
-db.createObjectStore("menu",{keyPath:"id",autoIncrement:true})
-db.createObjectStore("transaksi",{keyPath:"id",autoIncrement:true})
+  db=e.target.result
+  db.createObjectStore("menu",{keyPath:"id",autoIncrement:true})
+  db.createObjectStore("transaksi",{keyPath:"id",autoIncrement:true})
 }
 req.onsuccess=e=>{
-db=e.target.result
-loadMenu()
-updateLaporan()
+  db=e.target.result
+  loadMenu()
+  updateLaporan()
 }
 
-// ===== TOAST =====
 function toast(t){
-popup.innerText="✔ "+t
-popup.style.display="block"
-setTimeout(()=>popup.style.display="none",1500)
+  popup.innerText="✔ "+t
+  popup.style.display="block"
+  setTimeout(()=>popup.style.display="none",1200)
 }
 
-// ===== MENU MASTER =====
-function tambahMenu(){
-if(!menuNama.value||!menuHarga.value)return
-db.transaction("menu","readwrite").objectStore("menu")
-.add({nama:menuNama.value,harga:+menuHarga.value,kategori:menuKategori.value,favorit:false})
-menuNama.value="";menuHarga.value=""
-toast("Menu ditambahkan")
-loadMenu()
-}
-
-function importMenuCSV(){
-const f=csvMenu.files[0]; if(!f)return
-const r=new FileReader()
-r.onload=e=>{
-const l=e.target.result.split("\n")
-const s=db.transaction("menu","readwrite").objectStore("menu")
-for(let i=1;i<l.length;i++){
-const[n,k,h]=l[i].split(",")
-if(n&&h)s.add({nama:n.trim(),harga:+h,kategori:k||"Lainnya",favorit:false})
-}
-toast("Import selesai")
-loadMenu()
-}
-r.readAsText(f)
-}
-
+/* MENU */
 function loadMenu(){
-db.transaction("menu").objectStore("menu").getAll().onsuccess=e=>{
-menu=e.target.result
-renderMenu()
-}
+  db.transaction("menu").objectStore("menu").getAll().onsuccess=e=>{
+    menu=e.target.result
+    renderMenu()
+  }
 }
 
-// ===== MENU LIST =====
 function renderMenu(){
-menuList.innerHTML=""
-const key=searchMenu.value.toLowerCase()
-
-const grup={
-"⭐ Favorit":menu.filter(m=>m.favorit),
-"🍽️ Makanan":menu.filter(m=>m.kategori==="Makanan"),
-"🥤 Minuman":menu.filter(m=>m.kategori==="Minuman"),
-"📦 Lainnya":menu.filter(m=>m.kategori==="Lainnya")
-}
-
-Object.entries(grup).forEach(([g,arr])=>{
-const list=arr
-.filter(m=>m.nama.toLowerCase().includes(key))
-.sort((a,b)=>a.nama.localeCompare(b.nama,"id"))
-if(!list.length)return
-menuList.innerHTML+=`<div class="group-title">${g}</div>`
-list.forEach(m=>{
-const b=document.createElement("button")
-b.textContent=`${m.favorit?"⭐ ":""}${m.nama} - Rp${m.harga}`
-b.onclick=()=>{dipilih=m;toast(m.nama+" dipilih")}
-b.oncontextmenu=e=>{
-e.preventDefault()
-toggleFavorit(m.id)
-}
-menuList.appendChild(b)
-})
-})
+  menuList.innerHTML=""
+  const key=searchMenu.value.toLowerCase()
+  const grup={
+    "⭐ Favorit":menu.filter(m=>m.favorit),
+    "🍽️ Makanan":menu.filter(m=>m.kategori==="Makanan"),
+    "🥤 Minuman":menu.filter(m=>m.kategori==="Minuman"),
+    "📦 Lainnya":menu.filter(m=>m.kategori==="Lainnya")
+  }
+  Object.entries(grup).forEach(([g,arr])=>{
+    const list=arr.filter(m=>m.nama.toLowerCase().includes(key))
+      .sort((a,b)=>a.nama.localeCompare(b.nama,"id"))
+    if(!list.length)return
+    menuList.innerHTML+=`<div class="group-title">${g}</div>`
+    list.forEach(m=>{
+      const b=document.createElement("button")
+      b.className="menu-btn"+(dipilih&&dipilih.id===m.id?" active":"")
+      b.innerHTML=`
+        <span class="badge ${m.kategori.toLowerCase()}">${m.kategori}</span>
+        ${m.nama}<small>Rp${m.harga}</small>`
+      b.onclick=()=>{dipilih=m;renderMenu()}
+      b.oncontextmenu=e=>{e.preventDefault();toggleFavorit(m.id)}
+      menuList.appendChild(b)
+    })
+  })
 }
 
 function toggleFavorit(id){
-const s=db.transaction("menu","readwrite").objectStore("menu")
-s.get(id).onsuccess=e=>{
-const m=e.target.result
-m.favorit=!m.favorit
-s.put(m)
-toast("Favorit diubah")
-loadMenu()
-}
+  const s=db.transaction("menu","readwrite").objectStore("menu")
+  s.get(id).onsuccess=e=>{
+    const m=e.target.result
+    m.favorit=!m.favorit
+    s.put(m); loadMenu()
+  }
 }
 
-// ===== KERANJANG =====
+/* KERANJANG */
 function tambahKeKeranjang(){
-if(!dipilih||!qty.value)return
-keranjang.push({
-nama:dipilih.nama,
-qty:+qty.value,
-subtotal:dipilih.harga*qty.value
-})
-qty.value=""
-renderKeranjang()
-toast("Masuk keranjang")
+  if(!dipilih||!qty.value)return
+  const q=+qty.value
+  keranjang.push({nama:dipilih.nama,harga:dipilih.harga,qty:q,subtotal:q*dipilih.harga})
+  qty.value=""
+  renderKeranjang()
 }
 
 function renderKeranjang(){
-keranjangList.innerHTML=""
-let t=0
-keranjang.forEach(i=>{
-t+=i.subtotal
-keranjangList.innerHTML+=`<li>${i.nama} x${i.qty} = Rp${i.subtotal}</li>`
-})
-totalAll.innerText=t
+  keranjangList.innerHTML=""
+  let t=0
+  keranjang.forEach((i,idx)=>{
+    t+=i.subtotal
+    keranjangList.innerHTML+=`
+      <li>
+        ${i.nama}
+        <div class="qty">
+          <button class="qty-btn" onclick="ubahQty(${idx},-1)">−</button>
+          ${i.qty}
+          <button class="qty-btn" onclick="ubahQty(${idx},1)">+</button>
+          <button class="del" onclick="hapusItem(${idx})">✕</button>
+        </div>
+      </li>`
+  })
+  totalAll.innerText=t
 }
 
-// ===== TRANSAKSI =====
+function ubahQty(i,d){
+  keranjang[i].qty+=d
+  if(keranjang[i].qty<=0)keranjang.splice(i,1)
+  else keranjang[i].subtotal=keranjang[i].harga*keranjang[i].qty
+  renderKeranjang()
+}
+function hapusItem(i){keranjang.splice(i,1);renderKeranjang()}
+
+/* TRANSAKSI */
 function simpanTransaksi(){
-if(!keranjang.length)return
-db.transaction("transaksi","readwrite").objectStore("transaksi")
-.add({
-tanggal:new Date().toISOString().slice(0,10),
-items:keranjang,
-total:keranjang.reduce((s,i)=>s+i.subtotal,0)
-})
-keranjang=[]
-renderKeranjang()
-toast("Transaksi tersimpan")
-updateLaporan()
-autoBackup()
+  if(!keranjang.length)return
+  db.transaction("transaksi","readwrite").objectStore("transaksi")
+    .add({
+      tanggal:new Date().toISOString().slice(0,10),
+      items:keranjang,
+      total:keranjang.reduce((s,i)=>s+i.subtotal,0)
+    })
+  keranjang=[]
+  renderKeranjang()
+  toast("Transaksi tersimpan")
+  updateLaporan()
 }
 
-// ===== LAPORAN =====
+/* LAPORAN */
 function updateLaporan(){
-omzet30Hari()
-grafik7Hari()
-top20Menu()
+  let now=new Date(), sum=0, map={}
+  db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
+    e.target.result.forEach(t=>{
+      if((now-new Date(t.tanggal))/86400000<=30) sum+=t.total
+      map[t.tanggal]=(map[t.tanggal]||0)+t.total
+    })
+    omzet30.innerText=sum
+    renderChart(map)
+  }
 }
 
-function omzet30Hari(){
-let sum=0,now=new Date()
-db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
-e.target.result.forEach(t=>{
-if((now-new Date(t.tanggal))/86400000<=30)sum+=t.total
-})
-omzet30.innerText=sum
-}
-}
-
-function grafik7Hari(){
-const map={},labels=[],data=[]
-for(let i=6;i>=0;i--){
-const d=new Date();d.setDate(d.getDate()-i)
-const k=d.toISOString().slice(0,10)
-labels.push(k.slice(5)); map[k]=0
-}
-db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
-e.target.result.forEach(t=>{
-if(map[t.tanggal]!=null)map[t.tanggal]+=t.total
-})
-Object.values(map).forEach(v=>data.push(v))
-if(chart7hari)chart7hari.destroy()
-chart7hari=new Chart(document.getElementById("chart7hari"),{
-type:"line",
-data:{labels,datasets:[{data}]}
-})
-}
+function renderChart(map){
+  const labels=[],data=[]
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i)
+    const k=d.toISOString().slice(0,10)
+    labels.push(k.slice(5))
+    data.push(map[k]||0)
+  }
+  if(chart)chart.destroy()
+  chart=new Chart(chart7,{type:"line",data:{labels,datasets:[{data}]}})
 }
 
-function top20Menu(){
-const m={}
-db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
-e.target.result.forEach(t=>{
-t.items.forEach(i=>m[i.nama]=(m[i.nama]||0)+i.qty)
-})
-top20.innerHTML=""
-Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,20)
-.forEach(([n,q])=>{
-top20.innerHTML+=`<tr><td>${n}</td><td>${q}</td></tr>`
-})
-}
-}
-
-// ===== BACKUP LOCAL =====
+/* BACKUP */
 function backupLocal(){
-const data={}
-db.transaction("menu").objectStore("menu").getAll().onsuccess=e=>{
-data.menu=e.target.result
-db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=t=>{
-data.transaksi=t.target.result
-const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"})
-const a=document.createElement("a")
-a.href=URL.createObjectURL(blob)
-a.download=`cibaicibi-backup-${Date.now()}.json`
-a.click()
-toast("Backup local berhasil")
-}
-}
+  const data={}
+  db.transaction("menu").objectStore("menu").getAll().onsuccess=e=>{
+    data.menu=e.target.result
+    db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=t=>{
+      data.transaksi=t.target.result
+      const a=document.createElement("a")
+      a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"}))
+      a.download="cibaicibi-backup.json"
+      a.click()
+    }
+  }
 }
 
 function restoreLocal(){
-const f=restoreFile.files[0]
-if(!f||!confirm("Data lama akan ditimpa"))return
-const r=new FileReader()
-r.onload=e=>{
-const d=JSON.parse(e.target.result)
-const tm=db.transaction("menu","readwrite").objectStore("menu")
-tm.clear(); d.menu.forEach(m=>tm.add(m))
-const tt=db.transaction("transaksi","readwrite").objectStore("transaksi")
-tt.clear(); d.transaksi.forEach(t=>tt.add(t))
-toast("Restore selesai")
-loadMenu(); updateLaporan()
+  const f=restoreFile.files[0]; if(!f)return
+  const r=new FileReader()
+  r.onload=e=>{
+    const d=JSON.parse(e.target.result)
+    const m=db.transaction("menu","readwrite").objectStore("menu")
+    const t=db.transaction("transaksi","readwrite").objectStore("transaksi")
+    m.clear();t.clear()
+    d.menu.forEach(x=>m.add(x))
+    d.transaksi.forEach(x=>t.add(x))
+    loadMenu();updateLaporan()
+  }
+  r.readAsText(f)
 }
-r.readAsText(f)
+
+/* GITHUB SYNC */
+function syncMenuGithub(){
+  if(!confirm("Menu lama akan ditimpa"))return
+  fetch(GITHUB_MENU_URL).then(r=>r.text()).then(csv=>{
+    const rows=csv.split("\n")
+    const s=db.transaction("menu","readwrite").objectStore("menu")
+    s.clear()
+    for(let i=1;i<rows.length;i++){
+      const [n,k,h]=rows[i].split(",")
+      if(n&&h)s.add({nama:n.trim(),kategori:(k||"Makanan").trim(),harga:+h,favorit:false})
+    }
+    loadMenu()
+    toast("Menu sync berhasil")
+  })
 }
-// ===== SYNC MENU DARI GITHUB =====
-function syncMenuGithub() {
-  if (!confirm("Menu lama akan ditimpa dari GitHub. Lanjutkan?")) return;
 
-  const url = "https://raw.githubusercontent.com/sismoyoo/cibaicibi/main/menu_sawah.csv";
-
-  fetch(url)
-    .then(res => {
-      if (!res.ok) throw new Error("Gagal ambil file");
-      return res.text();
-    })
-    .then(csv => {
-      const rows = csv.split("\n");
-      const store = db.transaction("menu", "readwrite").objectStore("menu");
-
-      store.clear(); // TIMPA MENU LAMA
-
-      for (let i = 1; i < rows.length; i++) {
-        const [nama, kategori, harga] = rows[i].split(",");
-        if (!nama || !harga) continue;
-
-        store.add({
-          nama: nama.trim(),
-          kategori: (kategori || "Makanan").trim(),
-          harga: Number(harga),
-          favorit: false
-        });
-      }
-
-      toast("Menu berhasil sync dari GitHub");
-      loadMenu();
-    })
-    .catch(err => {
-      alert("Gagal sync menu: " + err.message);
-    });
+/* DARK MODE */
+function toggleDark(){
+  document.body.classList.toggle("dark")
+  localStorage.setItem("darkMode",
+    document.body.classList.contains("dark")?"1":"0")
+}
+if(localStorage.getItem("darkMode")==="1"){
+  document.body.classList.add("dark")
 }
