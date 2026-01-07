@@ -1,10 +1,12 @@
 let db, chart7hari;
+let keranjang = [];
+
 const req = indexedDB.open("cibaicibi_db", 1);
 
 req.onupgradeneeded = e => {
   db = e.target.result;
   db.createObjectStore("menu", { keyPath:"id", autoIncrement:true });
-  db.createObjectStore("penjualan", { keyPath:"id", autoIncrement:true });
+  db.createObjectStore("transaksi", { keyPath:"id", autoIncrement:true });
 };
 
 req.onsuccess = e => {
@@ -15,7 +17,7 @@ req.onsuccess = e => {
   top10Menu();
 };
 
-// ===== MENU =====
+// ===== MENU MASTER =====
 function tambahMenu() {
   if (!menuNama.value || !menuHarga.value) return alert("Lengkapi menu");
   db.transaction("menu","readwrite").objectStore("menu").add({
@@ -30,28 +32,22 @@ function tambahMenu() {
 // ===== BULK CSV =====
 function importMenuCSV() {
   const file = csvMenu.files[0];
-  if (!file) return alert("Pilih file CSV");
+  if (!file) return alert("Pilih CSV");
 
   const reader = new FileReader();
   reader.onload = e => {
     const lines = e.target.result.split("\n");
-    const tx = db.transaction("menu","readwrite");
-    const store = tx.objectStore("menu");
-
+    const store = db.transaction("menu","readwrite").objectStore("menu");
     for (let i=1;i<lines.length;i++) {
-      const [nama,kategori,harga] = lines[i].split(",");
-      if (nama && harga) {
-        store.add({
-          nama: nama.trim(),
-          kategori: (kategori||"Lainnya").trim(),
-          harga: Number(harga.trim())
-        });
-      }
+      const [n,k,h] = lines[i].split(",");
+      if (n && h) store.add({
+        nama:n.trim(),
+        kategori:(k||"Lainnya").trim(),
+        harga:Number(h.trim())
+      });
     }
-    tx.oncomplete = () => {
-      alert("Import menu selesai");
-      loadMenu();
-    };
+    alert("Import menu selesai");
+    loadMenu();
   };
   reader.readAsText(file);
 }
@@ -61,101 +57,118 @@ function loadMenu() {
   menuSelect.innerHTML="";
   db.transaction("menu").objectStore("menu").getAll().onsuccess = e => {
     e.target.result.forEach(m => {
-      const o = document.createElement("option");
-      o.text = `${m.nama} - Rp${m.harga}`;
-      o.dataset.nama = m.nama;
-      o.dataset.harga = m.harga;
+      const o=document.createElement("option");
+      o.text=`${m.nama} - Rp${m.harga}`;
+      o.dataset.nama=m.nama;
+      o.dataset.harga=m.harga;
       menuSelect.add(o);
     });
   };
 }
 
-menuSelect.onchange = () => {
-  const o = menuSelect.selectedOptions[0];
-  harga.value = o.dataset.harga;
-  hitungTotal();
-};
+menuSelect.onchange = () => harga.value =
+  menuSelect.selectedOptions[0]?.dataset.harga || "";
 
-qty.oninput = hitungTotal;
-function hitungTotal() {
-  total.value = qty.value * harga.value || "";
+// ===== KERANJANG =====
+function tambahKeKeranjang() {
+  const o = menuSelect.selectedOptions[0];
+  const q = Number(qty.value);
+  if (!o || q<=0) return alert("Pilih menu & qty");
+
+  keranjang.push({
+    menu:o.dataset.nama,
+    harga:Number(o.dataset.harga),
+    qty:q,
+    subtotal:q*Number(o.dataset.harga)
+  });
+  qty.value="";
+  renderKeranjang();
 }
 
-// ===== PENJUALAN =====
-function simpanPenjualan() {
-  if (!qty.value) return alert("Isi qty");
-  const o = menuSelect.selectedOptions[0];
-
-  db.transaction("penjualan","readwrite").objectStore("penjualan").add({
-    tanggal: new Date().toISOString().slice(0,10),
-    menu: o.dataset.nama,
-    qty: Number(qty.value),
-    total: Number(total.value)
+function renderKeranjang() {
+  daftarPesanan.innerHTML="";
+  let total=0;
+  keranjang.forEach((i,idx)=>{
+    total+=i.subtotal;
+    const li=document.createElement("li");
+    li.innerHTML=`${i.menu} x${i.qty} = Rp${i.subtotal}
+      <button onclick="hapusItem(${idx})">❌</button>`;
+    daftarPesanan.appendChild(li);
   });
+  grandTotal.innerText=total;
+}
 
-  qty.value=""; total.value="";
-  setTimeout(() => {
-    hitungOmzet30Hari();
-    grafik7Hari();
-    top10Menu();
-  },200);
+function hapusItem(i) {
+  keranjang.splice(i,1);
+  renderKeranjang();
+}
+
+// ===== SIMPAN TRANSAKSI =====
+function simpanTransaksi() {
+  if (keranjang.length===0) return alert("Keranjang kosong");
+  db.transaction("transaksi","readwrite").objectStore("transaksi").add({
+    tanggal:new Date().toISOString().slice(0,10),
+    items:keranjang,
+    total:keranjang.reduce((s,i)=>s+i.subtotal,0)
+  });
+  keranjang=[];
+  renderKeranjang();
+  hitungOmzet30Hari();
+  grafik7Hari();
+  top10Menu();
+  alert("Transaksi tersimpan");
 }
 
 // ===== OMZET 30 HARI =====
 function hitungOmzet30Hari() {
-  let sum = 0;
-  const now = new Date();
-
-  db.transaction("penjualan").objectStore("penjualan").getAll().onsuccess = e => {
-    e.target.result.forEach(p => {
-      const d = new Date(p.tanggal);
-      const diff = (now - d) / (1000*60*60*24);
-      if (diff <= 30) sum += p.total;
+  let sum=0;
+  const now=new Date();
+  db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
+    e.target.result.forEach(t=>{
+      const d=new Date(t.tanggal);
+      if ((now-d)/(1000*60*60*24)<=30) sum+=t.total;
     });
-    omzet30.innerText = sum;
+    omzet30.innerText=sum;
   };
 }
 
 // ===== GRAFIK 7 HARI =====
 function grafik7Hari() {
-  const map={}, labels=[], data=[];
-  for (let i=6;i>=0;i--) {
-    const d=new Date(); d.setDate(d.getDate()-i);
+  const map={},labels=[],data=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
     const k=d.toISOString().slice(0,10);
     labels.push(k.slice(5));
     map[k]=0;
   }
-
-  db.transaction("penjualan").objectStore("penjualan").getAll().onsuccess = e => {
-    e.target.result.forEach(p => {
-      if (map[p.tanggal]!=null) map[p.tanggal]+=p.total;
+  db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
+    e.target.result.forEach(t=>{
+      if(map[t.tanggal]!=null) map[t.tanggal]+=t.total;
     });
     Object.values(map).forEach(v=>data.push(v));
-
-    if (chart7hari) chart7hari.destroy();
-    chart7hari = new Chart(document.getElementById("chart7hari"),{
+    if(chart7hari) chart7hari.destroy();
+    chart7hari=new Chart(chart7hariCtx,{
       type:"line",
-      data:{ labels, datasets:[{ data }] }
+      data:{labels,datasets:[{data}]}
     });
   };
 }
+const chart7hariCtx=document.getElementById("chart7hari");
 
 // ===== TOP 10 MENU =====
 function top10Menu() {
-  const map = {};
-  db.transaction("penjualan").objectStore("penjualan").getAll().onsuccess = e => {
-    e.target.result.forEach(p => {
-      map[p.menu] = (map[p.menu]||0) + p.qty;
+  const map={};
+  db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
+    e.target.result.forEach(t=>{
+      t.items.forEach(i=>{
+        map[i.menu]=(map[i.menu]||0)+i.qty;
+      });
     });
-
-    const sorted = Object.entries(map)
-      .sort((a,b)=>b[1]-a[1])
-      .slice(0,10);
-
+    const top=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,10);
     topMenu.innerHTML="";
-    sorted.forEach(([menu,qty]) => {
+    top.forEach(([m,q])=>{
       const tr=document.createElement("tr");
-      tr.innerHTML=`<td>${menu}</td><td>${qty}</td>`;
+      tr.innerHTML=`<td>${m}</td><td>${q}</td>`;
       topMenu.appendChild(tr);
     });
   };
