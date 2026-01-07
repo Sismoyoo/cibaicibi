@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cibaicibi</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2E7D32" />
+
+  <style>
+    body { font-family: Arial; padding: 16px; background: #f4f4f4; }
+    h1 { text-align: center; }
+    input, select, button {
+      width: 100%; padding: 12px; margin: 6px 0; font-size: 16px;
+    }
+    button {
+      background: #2E7D32; color: white; border: none; border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🍽️ Cibaicibi</h1>
+
+<input id="menu" placeholder="Nama Menu" />
+<select id="kategori">
+  <option>Makanan</option>
+  <option>Minuman</option>
+  <option>Lainnya</option>
+</select>
+<input id="qty" type="number" placeholder="Qty" />
+<input id="harga" type="number" placeholder="Harga" />
+<input id="total" placeholder="Total" disabled />
+
+<button onclick="simpan()">Simpan Penjualan</button>
+
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+</body>
+</html>
