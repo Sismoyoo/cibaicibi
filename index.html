@@ -57,6 +57,39 @@ body.dark{
 }
 body.dark input{background:#1e1e1e;color:#eee;border:1px solid #333}
 body.dark .menu-btn{background:#2a2a2a;color:#eee}
+  /* ===== SCROLL MENU ===== */
+.menu-panel{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+
+.menu-scroll{
+  flex:1;
+  overflow-y:auto;
+  margin-top:8px;
+  padding-right:4px;
+}
+
+/* Scroll halus di iOS */
+.menu-scroll{
+  -webkit-overflow-scrolling:touch;
+}
+
+/* Optional: scrollbar kecil (desktop) */
+.menu-scroll::-webkit-scrollbar{
+  width:4px;
+}
+.menu-scroll::-webkit-scrollbar-thumb{
+  background:#ccc;
+  border-radius:10px;
+}
+
+/* Dark mode scrollbar */
+body.dark .menu-scroll::-webkit-scrollbar-thumb{
+  background:#555;
+}
+
 </style>
 </head>
 
@@ -68,12 +101,16 @@ body.dark .menu-btn{background:#2a2a2a;color:#eee}
 
 <div class="app">
 
-  <div class="panel">
-    <input id="searchMenu" placeholder="🔍 Cari menu..." oninput="renderMenu()">
+  <div class="panel menu-panel">
+  <input id="searchMenu" placeholder="🔍 Cari menu..." oninput="renderMenu()">
+
+  <div class="menu-scroll">
     <div id="menuList" class="menu-grid"></div>
-    <input id="qty" type="number" placeholder="Qty">
-    <button onclick="tambahKeKeranjang()">➕ Tambah</button>
   </div>
+
+  <input id="qty" type="number" placeholder="Qty">
+  <button onclick="tambahKeKeranjang()">➕ Tambah</button>
+</div>
 
   <div class="panel">
     <h3>🛒 Keranjang</h3>
