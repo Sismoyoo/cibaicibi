@@ -13,12 +13,15 @@
   <style>
     body { font-family: Arial; background:#f4f4f4; padding:16px }
     h1 { text-align:center }
+    h2 { margin-top:8px }
     .box { background:#fff; padding:12px; border-radius:8px; margin-bottom:16px }
     input, select, button {
       width:100%; padding:12px; margin:6px 0; font-size:16px
     }
     button { background:#2E7D32; color:#fff; border:none; border-radius:6px }
     canvas { margin-top:12px }
+    table { width:100%; font-size:14px; border-collapse:collapse }
+    th, td { border-bottom:1px solid #ddd; padding:6px; text-align:left }
   </style>
 </head>
 <body>
@@ -39,9 +42,7 @@
   <h3>📥 Import Menu (CSV)</h3>
   <input type="file" id="csvMenu" accept=".csv">
   <button onclick="importMenuCSV()">Import CSV</button>
-  <p style="font-size:12px;color:#555">
-    Format CSV: nama,kategori,harga
-  </p>
+  <p style="font-size:12px;color:#555">Format: nama,kategori,harga</p>
 </div>
 
 <div class="box">
@@ -54,13 +55,23 @@
 </div>
 
 <div class="box">
-  <h2>📅 Rekap Hari Ini</h2>
-  <p>Total Omzet: Rp<span id="totalHari">0</span></p>
+  <h2>💰 Omzet 30 Hari Terakhir</h2>
+  <p style="font-size:20px"><b>Rp <span id="omzet30">0</span></b></p>
 </div>
 
 <div class="box">
   <h2>📈 Grafik Omzet 7 Hari</h2>
   <canvas id="chart7hari"></canvas>
+</div>
+
+<div class="box">
+  <h2>🏆 Top 10 Menu Paling Laris</h2>
+  <table>
+    <thead>
+      <tr><th>Menu</th><th>Qty</th></tr>
+    </thead>
+    <tbody id="topMenu"></tbody>
+  </table>
 </div>
 
 <script src="app.js"></script>
