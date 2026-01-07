@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cibaicibi</title>
+  <title>Cibaicibi POS</title>
 
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2E7D32">
@@ -15,16 +15,20 @@
     body { font-family: Arial; background:#f4f4f4; padding:16px }
     h1 { text-align:center }
     .box { background:#fff; padding:12px; border-radius:8px; margin-bottom:16px }
-    input, button { width:100%; padding:12px; margin:6px 0; font-size:16px }
+    input, button {
+      width:100%; padding:12px; margin:6px 0; font-size:16px
+    }
     button { background:#2E7D32; color:#fff; border:none; border-radius:6px }
     ul { padding-left:18px }
     li { margin-bottom:6px }
+    table { width:100%; border-collapse:collapse; font-size:14px }
+    th,td { border-bottom:1px solid #ddd; padding:6px }
     .group-title { font-weight:bold; margin-top:8px }
   </style>
 </head>
 <body>
 
-<h1>🍽️ Cibaicibi</h1>
+<h1>🍽️ Cibaicibi POS</h1>
 
 <!-- BACKUP -->
 <div class="box">
@@ -32,17 +36,6 @@
   <button onclick="loginGoogle()">Login Google</button>
   <button onclick="backupKeDrive()">Backup Sekarang</button>
   <p id="statusBackup">Belum login</p>
-</div>
-
-<!-- MENU MASTER -->
-<div class="box">
-  <h2>📋 Menu Master</h2>
-  <input id="menuNama" placeholder="Nama Menu">
-  <input id="menuHarga" type="number" placeholder="Harga">
-  <button onclick="tambahMenu()">Tambah Menu</button>
-
-  <input type="file" id="csvMenu" accept=".csv">
-  <button onclick="importMenuCSV()">Import CSV</button>
 </div>
 
 <!-- INPUT PENJUALAN -->
@@ -57,7 +50,28 @@
   <h3>🛒 Keranjang</h3>
   <ul id="keranjangList"></ul>
   <b>Total: Rp <span id="totalAll">0</span></b>
-  <button onclick="simpanTransaksi()">💾 Simpan</button>
+  <button onclick="simpanTransaksi()">💾 Simpan Transaksi</button>
+</div>
+
+<!-- ANALITIK -->
+<div class="box">
+  <h2>💰 Omzet 30 Hari Terakhir</h2>
+  <p style="font-size:20px"><b>Rp <span id="omzet30">0</span></b></p>
+</div>
+
+<div class="box">
+  <h2>📈 Grafik Omzet 7 Hari Terakhir</h2>
+  <canvas id="chart7hari"></canvas>
+</div>
+
+<div class="box">
+  <h2>🏆 Top 20 Menu Paling Laris</h2>
+  <table>
+    <thead>
+      <tr><th>Menu</th><th>Qty</th></tr>
+    </thead>
+    <tbody id="topMenu20"></tbody>
+  </table>
 </div>
 
 <!-- POPUP -->
