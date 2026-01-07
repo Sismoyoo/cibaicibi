@@ -178,3 +178,56 @@ top20.innerHTML+=`<tr><td>${n}</td><td>${q}</td></tr>`
 })
 }
 }
+
+function backupLocal() {
+  const data = {};
+
+  db.transaction("menu").objectStore("menu").getAll().onsuccess = e => {
+    data.menu = e.target.result;
+
+    db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess = t => {
+      data.transaksi = t.target.result;
+
+      const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: "application/json" }
+      );
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `cibaicibi-backup-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      toast("Backup local berhasil");
+    };
+  };
+}
+
+function restoreLocal() {
+  const file = document.getElementById("restoreFile").files[0];
+  if (!file) return alert("Pilih file backup");
+
+  if (!confirm("Restore akan menimpa data lama. Lanjutkan?")) return;
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = JSON.parse(e.target.result);
+
+    const txMenu = db.transaction("menu", "readwrite");
+    txMenu.objectStore("menu").clear();
+    data.menu.forEach(m => txMenu.objectStore("menu").add(m));
+
+    const txTrx = db.transaction("transaksi", "readwrite");
+    txTrx.objectStore("transaksi").clear();
+    data.transaksi.forEach(t => txTrx.objectStore("transaksi").add(t));
+
+    txTrx.oncomplete = () => {
+      toast("Restore berhasil");
+      loadMenu();
+      updateLaporan();
+    };
+  };
+  reader.readAsText(file);
+}
