@@ -7,21 +7,20 @@
 
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2E7D32">
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body { font-family: Arial; background:#f4f4f4; padding:16px }
     h1 { text-align:center }
-    h2 { margin-top:8px }
     .box { background:#fff; padding:12px; border-radius:8px; margin-bottom:16px }
     input, select, button {
       width:100%; padding:12px; margin:6px 0; font-size:16px
     }
     button { background:#2E7D32; color:#fff; border:none; border-radius:6px }
-    canvas { margin-top:12px }
-    table { width:100%; font-size:14px; border-collapse:collapse }
-    th, td { border-bottom:1px solid #ddd; padding:6px; text-align:left }
+    ul { padding-left:18px }
+    li { margin-bottom:6px }
+    table { width:100%; border-collapse:collapse; font-size:14px }
+    th,td { border-bottom:1px solid #ddd; padding:6px }
   </style>
 </head>
 <body>
@@ -39,19 +38,22 @@
   <input id="menuHarga" type="number" placeholder="Harga">
   <button onclick="tambahMenu()">Tambah Menu</button>
 
-  <h3>📥 Import Menu (CSV)</h3>
+  <h3>📥 Import CSV</h3>
   <input type="file" id="csvMenu" accept=".csv">
-  <button onclick="importMenuCSV()">Import CSV</button>
-  <p style="font-size:12px;color:#555">Format: nama,kategori,harga</p>
+  <button onclick="importMenuCSV()">Import Menu</button>
 </div>
 
 <div class="box">
-  <h2>➕ Input Penjualan</h2>
+  <h2>🧾 Input Penjualan</h2>
   <select id="menuSelect"></select>
   <input id="harga" disabled>
   <input id="qty" type="number" placeholder="Qty">
-  <input id="total" disabled>
-  <button onclick="simpanPenjualan()">Simpan</button>
+  <button onclick="tambahKeKeranjang()">➕ Tambah ke Keranjang</button>
+
+  <h3>🛒 Keranjang</h3>
+  <ul id="daftarPesanan"></ul>
+  <p><b>Total: Rp <span id="grandTotal">0</span></b></p>
+  <button onclick="simpanTransaksi()">💾 Simpan Transaksi</button>
 </div>
 
 <div class="box">
@@ -60,7 +62,7 @@
 </div>
 
 <div class="box">
-  <h2>📈 Grafik Omzet 7 Hari</h2>
+  <h2>📈 Omzet 7 Hari</h2>
   <canvas id="chart7hari"></canvas>
 </div>
 
