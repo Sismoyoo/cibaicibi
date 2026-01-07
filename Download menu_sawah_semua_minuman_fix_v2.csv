@@ -1,0 +1,155 @@
+nama,kategori,harga
+Ayam Goreng,Makanan,12000
+Ayam Bakar Manis,Makanan,12000
+Ayam Trasi Merah,Makanan,22000
+Ayam Rica Rica,Makanan,22000
+Ayam Bakar Sambal Bali,Makanan,18000
+Tumis Ayam Bawang,Makanan,23000
+Ayam Woku Belanga,Makanan,22000
+Ayam Kuluyuk,Makanan,22000
+Ayam Korean Sauce,Makanan,18000
+Ayam Madu Butter,Makanan,18000
+Ayam Mongolian,Makanan,18000
+Ayam Sweet Chili Sauce,Makanan,18000
+Bebek Goreng Sambal Mangga,Makanan,23000
+Bebek Goreng Sambal Bawang,Makanan,23000
+Fillet Gurameh Woku Belanga,Makanan,46000
+Fillet Gurameh Asam Manis,Makanan,46000
+Gurameh Goreng,Makanan,40000
+Gurameh Bakar,Makanan,42000
+Gurameh Rica Rica,Makanan,46000
+Gurameh Sambal Mangga,Makanan,46000
+Gurameh Sweet Chili Sauce,Makanan,46000
+Gurameh Kuah Kuning,Makanan,46000
+Nila Goreng,Makanan,15000
+Nila Bakar,Makanan,15000
+Nila Sambal Mangga,Makanan,17000
+Nila Woku Belanga,Makanan,19000
+Nila Sweet Chili Sauce,Makanan,18000
+Nila Asam Manis,Makanan,18000
+Nila Bakar Sambal Bali,Makanan,18000
+Tom Yam Udang,Makanan,35000
+Brokoli Udang Saus Tiram,Makanan,35000
+Udang Sambal Bali,Makanan,35000
+Udang Asam Manis,Makanan,35000
+Udang Woku Belanga,Makanan,35000
+Udang Sweet Chili Sauce,Makanan,35000
+Udang Goreng Tepung,Makanan,35000
+Udang Carbonara,Makanan,35000
+Cumi Woku Belanga,Makanan,32000
+Cumi Sweet Chili Sauce,Makanan,32000
+Cumi Goreng Tepung,Makanan,32000
+Cumi Sambal Bali,Makanan,32000
+Cumi Asam Manis,Makanan,32000
+Cumi Carbonara,Makanan,32000
+Kerang Hijau Bakar,Makanan,22000
+Kerang Hijau Woku Belanga,Makanan,22000
+Nasi Goreng Seafood,Makanan,21000
+Nasi Goreng Tuna Pedas,Makanan,26000
+Nasi Goreng Telor,Makanan,18000
+Nasi Goreng Sapi Mercon,Makanan,26000
+Nasi Goreng Ayam Woku,Makanan,26000
+Nasi Goreng Udang,Makanan,35000
+Kwetiau Siram Ca Jamur,Makanan,17000
+Kwetiau Goreng Ayam,Makanan,17000
+Bakmi Goreng Jawa,Makanan,17000
+Bakmi Goreng Jawa Spesial,Makanan,26000
+Bakmi Kuah Jawa,Makanan,18000
+Bakmi Kuah Jawa Spesial,Makanan,27000
+Jukut Goreng,Makanan,12000
+Terong Balado,Makanan,10000
+Kangkung Sambal Terasi,Makanan,14000
+Cap Cay Goreng Sawah,Makanan,14000
+Kangkung Tauco Pedas,Makanan,14000
+Ca Brokoli Bawang Putih,Makanan,14000
+Cap Cay Goreng Kekian Ayam,Makanan,14000
+Ca Kangkung Ayam,Makanan,10000
+Plencing Kangkung,Makanan,10000
+Tumis Toge Teri Asin,Makanan,10000
+Tumis Daun Pepaya,Makanan,12000
+Tumis Bunga Pepaya,Makanan,15000
+Tumis Kangkung,Makanan,10000
+Soup Ayam Kampung,Makanan,26000
+Cream Soup Brokoli,Makanan,14000
+Cap Cay Kuah,Makanan,14000
+Soup Bola Bola Ayam,Makanan,20000
+Soup Rolade Ayam Bawang,Makanan,18000
+Sapi Mercon,Makanan,35000
+Tuna Sambal Matah,Makanan,18000
+Sambal Teri Tomat Ijo,Makanan,18000
+Sambal Tempe Telur,Makanan,15000
+Sambal Terasi Matang,Makanan,5000
+Sambal Kecap Ebi Jahe,Makanan,5000
+Sambal Mangga,Makanan,7000
+Sambal Bawang,Makanan,5000
+Ayam Panggang Utuh,Makanan,68000
+Stim Ayam Jahe Utuh,Makanan,68000
+Telur Crispy,Makanan,12000
+Crispy Fuyunghai,Makanan,18000
+Nasi Putih,Makanan,5000
+Spaghetti Bolognese,Makanan,22000
+Fettuccine Carbonara,Makanan,22000
+Fettuccine Blackpepper,Makanan,22000
+Wader Kali Goreng Sambal Bawang,Makanan,15000
+Udang Kali Goreng Sambal Terasi,Makanan,15000
+Tempe Goreng,Makanan,10000
+Tempe Bakar,Makanan,10000
+Terong Goreng Crispy,Makanan,10000
+Tahu Goreng,Makanan,10000
+Tempe Mendoan,Makanan,10000
+Gorengan Platter,Makanan,15000
+Singkong Goreng Keju,Makanan,15000
+Bakwan Jagung,Makanan,18000
+Salad Mangga Muda,Makanan,15000
+Buah Potong,Makanan,10000
+Pangsit Chili Oil,Makanan,18000
+Pisang Goreng,Makanan,20000
+Pisang Goreng Keju Susu,Makanan,22000
+Kentang Goreng Classic,Makanan,17000
+Kentang Goreng Carbonara,Makanan,20000
+Kentang Goreng Bolognese,Makanan,20000
+Es Telang Lemon,Minuman,15000
+Es Mango Jelly,Minuman,15000
+Es Vanila Melon Selasih,Minuman,15000
+Es Lemon Tea,Minuman,8000
+Es Teh,Minuman,5000
+Es Jeruk,Minuman,8000
+Es Tape Ketan,Minuman,10000
+Es Tomat,Minuman,10000
+Es Kelapa Muda Gula Aren,Minuman,15000
+Soda Gembira,Minuman,15000
+Es Mojito,Minuman,15000
+Es Capucino Cincau,Minuman,15000
+Es Teh Tarik,Minuman,12000
+Es Millo Monster,Minuman,12000
+Es Coklat,Minuman,12000
+Es Kopi Susu Gula Aren,Minuman,15000
+Teh Panas Manis,Minuman,5000
+Teh Tawar Panas,Minuman,3000
+Jeruk Panas,Minuman,8000
+Jeruk Tawar,Minuman,6000
+Wedang Tape Ketan,Minuman,10000
+Wedang Tomat,Minuman,10000
+Coklat Panas,Minuman,12000
+Teh Tarik Panas,Minuman,12000
+Kopi Hitam,Minuman,10000
+Tape Susu Panas,Minuman,12000
+Wedang Rosela,Minuman,10000
+Wedang Sere Jeruk Nipis,Minuman,10000
+Wedang Secang,Minuman,10000
+Wedang Susu Jahe Secang,Minuman,15000
+Wedang Sekoteng,Minuman,12000
+Es Kunyit Asam,Minuman,12000
+Es Beras Kencur,Minuman,12000
+Es Campur Buah,Minuman,15000
+Es Dawet Gula Aren,Minuman,15000
+Juice Tomat,Minuman,10000
+Juice Semangka,Minuman,10000
+Juice Melon,Minuman,10000
+Juice Jambu,Minuman,10000
+Juice Mangga,Minuman,12000
+Juice Alpukat Susu,Minuman,15000
+Air Mineral,Minuman,8000
+Coca Cola,Minuman,8000
+Sprite,Minuman,8000
+Fanta,Minuman,8000
