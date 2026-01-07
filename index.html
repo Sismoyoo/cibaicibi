@@ -38,9 +38,9 @@
   <input id="menuHarga" type="number" placeholder="Harga">
   <button onclick="tambahMenu()">Tambah Menu</button>
 
-  <h3>📥 Import CSV</h3>
+  <h3>📥 Import Menu (CSV)</h3>
   <input type="file" id="csvMenu" accept=".csv">
-  <button onclick="importMenuCSV()">Import Menu</button>
+  <button onclick="importMenuCSV()">Import CSV</button>
 </div>
 
 <div class="box">
@@ -74,6 +74,25 @@
     </thead>
     <tbody id="topMenu"></tbody>
   </table>
+</div>
+
+<!-- POPUP SUCCESS -->
+<div id="popupSuccess"
+  style="
+    display:none;
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#2E7D32;
+    color:white;
+    padding:12px 20px;
+    border-radius:8px;
+    font-size:16px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.3);
+    z-index:9999;
+  ">
+  ✔ Berhasil
 </div>
 
 <script src="app.js"></script>
