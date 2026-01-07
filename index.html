@@ -8,6 +8,9 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2E7D32">
 
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -15,7 +18,7 @@
       padding: 16px;
     }
     h1 { text-align: center; }
-    h2 { margin-top: 24px; }
+    h2 { margin-top: 20px; }
     input, select, button {
       width: 100%;
       padding: 12px;
@@ -34,8 +37,7 @@
       border-radius: 8px;
       margin-bottom: 16px;
     }
-    ul { padding-left: 20px; }
-    li { margin-bottom: 6px; }
+    canvas { margin-top: 12px; }
   </style>
 </head>
 <body>
@@ -52,23 +54,39 @@
   </select>
   <input id="menuHarga" type="number" placeholder="Harga">
   <button onclick="tambahMenu()">Simpan Menu</button>
-
-  <ul id="daftarMenu"></ul>
 </div>
 
 <div class="box">
   <h2>➕ Input Penjualan</h2>
-
   <select id="menuSelect">
     <option value="">-- Pilih Menu --</option>
   </select>
-
-  <input id="kategori" placeholder="Kategori" disabled>
   <input id="harga" placeholder="Harga" disabled>
   <input id="qty" type="number" placeholder="Qty">
   <input id="total" placeholder="Total" disabled>
+  <button onclick="simpanPenjualan()">Simpan</button>
+</div>
 
-  <button onclick="simpanPenjualan()">Simpan Penjualan</button>
+<div class="box">
+  <h2>📅 Rekap Hari Ini</h2>
+  <p><b>Total Omzet:</b> Rp<span id="totalHari">0</span></p>
+</div>
+
+<div class="box">
+  <h2>📈 Grafik Omzet 7 Hari Terakhir</h2>
+  <canvas id="chartHarian"></canvas>
+</div>
+
+<div class="box">
+  <h2>📊 Grafik Bulanan</h2>
+  <input type="month" id="bulan">
+  <button onclick="grafikBulanan()">Tampilkan</button>
+  <canvas id="chartBulanan"></canvas>
+</div>
+
+<div class="box">
+  <h2>📤 Export Excel</h2>
+  <button onclick="exportCSV()">Download CSV</button>
 </div>
 
 <script src="app.js"></script>
