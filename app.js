@@ -1,7 +1,7 @@
 let db,chart7hari
 let menu=[],keranjang=[],dipilih=null
 
-const req=indexedDB.open("cibaicibi_db",3)
+const req=indexedDB.open("cibaicibi_db",4)
 req.onupgradeneeded=e=>{
 db=e.target.result
 db.createObjectStore("menu",{keyPath:"id",autoIncrement:true})
@@ -13,13 +13,14 @@ loadMenu()
 updateLaporan()
 }
 
+// ===== TOAST =====
 function toast(t){
 popup.innerText="✔ "+t
 popup.style.display="block"
 setTimeout(()=>popup.style.display="none",1500)
 }
 
-// ===== MENU =====
+// ===== MENU MASTER =====
 function tambahMenu(){
 if(!menuNama.value||!menuHarga.value)return
 db.transaction("menu","readwrite").objectStore("menu")
@@ -55,7 +56,7 @@ renderMenu()
 // ===== MENU LIST =====
 function renderMenu(){
 menuList.innerHTML=""
-const s=searchMenu.value.toLowerCase()
+const key=searchMenu.value.toLowerCase()
 
 const grup={
 "⭐ Favorit":menu.filter(m=>m.favorit),
@@ -65,10 +66,11 @@ const grup={
 }
 
 Object.entries(grup).forEach(([g,arr])=>{
-const list=arr.filter(m=>m.nama.toLowerCase().includes(s))
+const list=arr
+.filter(m=>m.nama.toLowerCase().includes(key))
+.sort((a,b)=>a.nama.localeCompare(b.nama,"id"))
 if(!list.length)return
 menuList.innerHTML+=`<div class="group-title">${g}</div>`
-list.sort((a,b)=>a.nama.localeCompare(b.nama))
 list.forEach(m=>{
 const b=document.createElement("button")
 b.textContent=`${m.favorit?"⭐ ":""}${m.nama} - Rp${m.harga}`
@@ -120,7 +122,11 @@ totalAll.innerText=t
 function simpanTransaksi(){
 if(!keranjang.length)return
 db.transaction("transaksi","readwrite").objectStore("transaksi")
-.add({tanggal:new Date().toISOString().slice(0,10),items:keranjang,total:keranjang.reduce((s,i)=>s+i.subtotal,0)})
+.add({
+tanggal:new Date().toISOString().slice(0,10),
+items:keranjang,
+total:keranjang.reduce((s,i)=>s+i.subtotal,0)
+})
 keranjang=[]
 renderKeranjang()
 toast("Transaksi tersimpan")
@@ -139,7 +145,7 @@ function omzet30Hari(){
 let sum=0,now=new Date()
 db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
 e.target.result.forEach(t=>{
-if((now-new Date(t.tanggal))/(864e5)<=30)sum+=t.total
+if((now-new Date(t.tanggal))/86400000<=30)sum+=t.total
 })
 omzet30.innerText=sum
 }
@@ -158,7 +164,7 @@ if(map[t.tanggal]!=null)map[t.tanggal]+=t.total
 })
 Object.values(map).forEach(v=>data.push(v))
 if(chart7hari)chart7hari.destroy()
-chart7hari=new Chart(chart7hari,{
+chart7hari=new Chart(document.getElementById("chart7hari"),{
 type:"line",
 data:{labels,datasets:[{data}]}
 })
@@ -179,55 +185,35 @@ top20.innerHTML+=`<tr><td>${n}</td><td>${q}</td></tr>`
 }
 }
 
-function backupLocal() {
-  const data = {};
-
-  db.transaction("menu").objectStore("menu").getAll().onsuccess = e => {
-    data.menu = e.target.result;
-
-    db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess = t => {
-      data.transaksi = t.target.result;
-
-      const blob = new Blob(
-        [JSON.stringify(data, null, 2)],
-        { type: "application/json" }
-      );
-
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `cibaicibi-backup-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      toast("Backup local berhasil");
-    };
-  };
+// ===== BACKUP LOCAL =====
+function backupLocal(){
+const data={}
+db.transaction("menu").objectStore("menu").getAll().onsuccess=e=>{
+data.menu=e.target.result
+db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=t=>{
+data.transaksi=t.target.result
+const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"})
+const a=document.createElement("a")
+a.href=URL.createObjectURL(blob)
+a.download=`cibaicibi-backup-${Date.now()}.json`
+a.click()
+toast("Backup local berhasil")
+}
+}
 }
 
-function restoreLocal() {
-  const file = document.getElementById("restoreFile").files[0];
-  if (!file) return alert("Pilih file backup");
-
-  if (!confirm("Restore akan menimpa data lama. Lanjutkan?")) return;
-
-  const reader = new FileReader();
-  reader.onload = e => {
-    const data = JSON.parse(e.target.result);
-
-    const txMenu = db.transaction("menu", "readwrite");
-    txMenu.objectStore("menu").clear();
-    data.menu.forEach(m => txMenu.objectStore("menu").add(m));
-
-    const txTrx = db.transaction("transaksi", "readwrite");
-    txTrx.objectStore("transaksi").clear();
-    data.transaksi.forEach(t => txTrx.objectStore("transaksi").add(t));
-
-    txTrx.oncomplete = () => {
-      toast("Restore berhasil");
-      loadMenu();
-      updateLaporan();
-    };
-  };
-  reader.readAsText(file);
+function restoreLocal(){
+const f=restoreFile.files[0]
+if(!f||!confirm("Data lama akan ditimpa"))return
+const r=new FileReader()
+r.onload=e=>{
+const d=JSON.parse(e.target.result)
+const tm=db.transaction("menu","readwrite").objectStore("menu")
+tm.clear(); d.menu.forEach(m=>tm.add(m))
+const tt=db.transaction("transaksi","readwrite").objectStore("transaksi")
+tt.clear(); d.transaksi.forEach(t=>tt.add(t))
+toast("Restore selesai")
+loadMenu(); updateLaporan()
+}
+r.readAsText(f)
 }
