@@ -15,6 +15,7 @@ req.onsuccess=e=>{
   updateLaporan()
 }
 
+/* TOAST */
 function toast(t){
   popup.innerText="✔ "+t
   popup.style.display="block"
@@ -38,18 +39,22 @@ function renderMenu(){
     "🥤 Minuman":menu.filter(m=>m.kategori==="Minuman"),
     "📦 Lainnya":menu.filter(m=>m.kategori==="Lainnya")
   }
+
   Object.entries(grup).forEach(([g,arr])=>{
-    const list=arr.filter(m=>m.nama.toLowerCase().includes(key))
+    const list=arr
+      .filter(m=>m.nama.toLowerCase().includes(key))
       .sort((a,b)=>a.nama.localeCompare(b.nama,"id"))
     if(!list.length)return
+
     menuList.innerHTML+=`<div class="group-title">${g}</div>`
     list.forEach(m=>{
       const b=document.createElement("button")
       b.className="menu-btn"+(dipilih&&dipilih.id===m.id?" active":"")
       b.innerHTML=`
         <span class="badge ${m.kategori.toLowerCase()}">${m.kategori}</span>
-        ${m.nama}<small>Rp${m.harga}</small>`
-      b.onclick=()=>{dipilih=m;renderMenu()}
+        ${m.favorit?"⭐ ":""}${m.nama}
+        <small>Rp${m.harga}</small>`
+      b.onclick=()=>{dipilih=m;renderMenu();toast(m.nama+" dipilih")}
       b.oncontextmenu=e=>{e.preventDefault();toggleFavorit(m.id)}
       menuList.appendChild(b)
     })
@@ -61,17 +66,19 @@ function toggleFavorit(id){
   s.get(id).onsuccess=e=>{
     const m=e.target.result
     m.favorit=!m.favorit
-    s.put(m); loadMenu()
+    s.put(m)
+    loadMenu()
   }
 }
 
-/* KERANJANG */
+/* CART */
 function tambahKeKeranjang(){
   if(!dipilih||!qty.value)return
   const q=+qty.value
   keranjang.push({nama:dipilih.nama,harga:dipilih.harga,qty:q,subtotal:q*dipilih.harga})
   qty.value=""
   renderKeranjang()
+  toast("Masuk keranjang")
 }
 
 function renderKeranjang(){
@@ -81,10 +88,10 @@ function renderKeranjang(){
     t+=i.subtotal
     keranjangList.innerHTML+=`
       <li>
-        ${i.nama}
+        <div>${i.nama}</div>
         <div class="qty">
           <button class="qty-btn" onclick="ubahQty(${idx},-1)">−</button>
-          ${i.qty}
+          <b>${i.qty}</b>
           <button class="qty-btn" onclick="ubahQty(${idx},1)">+</button>
           <button class="del" onclick="hapusItem(${idx})">✕</button>
         </div>
@@ -121,7 +128,7 @@ function updateLaporan(){
   let now=new Date(), sum=0, map={}
   db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=e=>{
     e.target.result.forEach(t=>{
-      if((now-new Date(t.tanggal))/86400000<=30) sum+=t.total
+      if((now-new Date(t.tanggal))/86400000<=30)sum+=t.total
       map[t.tanggal]=(map[t.tanggal]||0)+t.total
     })
     omzet30.innerText=sum
@@ -149,7 +156,9 @@ function backupLocal(){
     db.transaction("transaksi").objectStore("transaksi").getAll().onsuccess=t=>{
       data.transaksi=t.target.result
       const a=document.createElement("a")
-      a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"}))
+      a.href=URL.createObjectURL(
+        new Blob([JSON.stringify(data,null,2)],{type:"application/json"})
+      )
       a.download="cibaicibi-backup.json"
       a.click()
     }
@@ -174,17 +183,24 @@ function restoreLocal(){
 /* GITHUB SYNC */
 function syncMenuGithub(){
   if(!confirm("Menu lama akan ditimpa"))return
-  fetch(GITHUB_MENU_URL).then(r=>r.text()).then(csv=>{
-    const rows=csv.split("\n")
-    const s=db.transaction("menu","readwrite").objectStore("menu")
-    s.clear()
-    for(let i=1;i<rows.length;i++){
-      const [n,k,h]=rows[i].split(",")
-      if(n&&h)s.add({nama:n.trim(),kategori:(k||"Makanan").trim(),harga:+h,favorit:false})
-    }
-    loadMenu()
-    toast("Menu sync berhasil")
-  })
+  fetch(GITHUB_MENU_URL)
+    .then(r=>r.text())
+    .then(csv=>{
+      const rows=csv.split("\n")
+      const s=db.transaction("menu","readwrite").objectStore("menu")
+      s.clear()
+      for(let i=1;i<rows.length;i++){
+        const [n,k,h]=rows[i].split(",")
+        if(n&&h)s.add({
+          nama:n.trim(),
+          kategori:(k||"Makanan").trim(),
+          harga:+h,
+          favorit:false
+        })
+      }
+      loadMenu()
+      toast("Menu sync berhasil")
+    })
 }
 
 /* DARK MODE */
