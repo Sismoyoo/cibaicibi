@@ -10,11 +10,12 @@ req.onupgradeneeded = e => {
 req.onsuccess = e => {
   db = e.target.result;
   loadMenu();
-  hitungHariIni();
+  hitungOmzet30Hari();
   grafik7Hari();
+  top10Menu();
 };
 
-// ===== MENU MANUAL =====
+// ===== MENU =====
 function tambahMenu() {
   if (!menuNama.value || !menuHarga.value) return alert("Lengkapi menu");
   db.transaction("menu","readwrite").objectStore("menu").add({
@@ -26,7 +27,7 @@ function tambahMenu() {
   setTimeout(loadMenu,200);
 }
 
-// ===== BULK IMPORT CSV =====
+// ===== BULK CSV =====
 function importMenuCSV() {
   const file = csvMenu.files[0];
   if (!file) return alert("Pilih file CSV");
@@ -47,7 +48,6 @@ function importMenuCSV() {
         });
       }
     }
-
     tx.oncomplete = () => {
       alert("Import menu selesai");
       loadMenu();
@@ -56,15 +56,15 @@ function importMenuCSV() {
   reader.readAsText(file);
 }
 
-// ===== LOAD MENU KE KASIR =====
+// ===== LOAD MENU =====
 function loadMenu() {
   menuSelect.innerHTML="";
   db.transaction("menu").objectStore("menu").getAll().onsuccess = e => {
     e.target.result.forEach(m => {
       const o = document.createElement("option");
       o.text = `${m.nama} - Rp${m.harga}`;
-      o.dataset.harga = m.harga;
       o.dataset.nama = m.nama;
+      o.dataset.harga = m.harga;
       menuSelect.add(o);
     });
   };
@@ -84,26 +84,35 @@ function hitungTotal() {
 // ===== PENJUALAN =====
 function simpanPenjualan() {
   if (!qty.value) return alert("Isi qty");
+  const o = menuSelect.selectedOptions[0];
+
   db.transaction("penjualan","readwrite").objectStore("penjualan").add({
     tanggal: new Date().toISOString().slice(0,10),
+    menu: o.dataset.nama,
+    qty: Number(qty.value),
     total: Number(total.value)
   });
+
   qty.value=""; total.value="";
   setTimeout(() => {
-    hitungHariIni();
+    hitungOmzet30Hari();
     grafik7Hari();
+    top10Menu();
   },200);
 }
 
-// ===== REKAP =====
-function hitungHariIni() {
-  const today = new Date().toISOString().slice(0,10);
+// ===== OMZET 30 HARI =====
+function hitungOmzet30Hari() {
   let sum = 0;
+  const now = new Date();
+
   db.transaction("penjualan").objectStore("penjualan").getAll().onsuccess = e => {
     e.target.result.forEach(p => {
-      if (p.tanggal===today) sum+=p.total;
+      const d = new Date(p.tanggal);
+      const diff = (now - d) / (1000*60*60*24);
+      if (diff <= 30) sum += p.total;
     });
-    totalHari.innerText=sum;
+    omzet30.innerText = sum;
   };
 }
 
@@ -127,6 +136,27 @@ function grafik7Hari() {
     chart7hari = new Chart(document.getElementById("chart7hari"),{
       type:"line",
       data:{ labels, datasets:[{ data }] }
+    });
+  };
+}
+
+// ===== TOP 10 MENU =====
+function top10Menu() {
+  const map = {};
+  db.transaction("penjualan").objectStore("penjualan").getAll().onsuccess = e => {
+    e.target.result.forEach(p => {
+      map[p.menu] = (map[p.menu]||0) + p.qty;
+    });
+
+    const sorted = Object.entries(map)
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,10);
+
+    topMenu.innerHTML="";
+    sorted.forEach(([menu,qty]) => {
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>${menu}</td><td>${qty}</td>`;
+      topMenu.appendChild(tr);
     });
   };
 }
