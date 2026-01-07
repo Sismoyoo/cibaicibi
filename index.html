@@ -23,20 +23,21 @@
 
 <h1>🍽️ Cibaicibi</h1>
 
-<h3>➕ Menu Master</h3>
-<input id="menuNama" placeholder="Nama Menu" />
-<select id="menuKategori">
-  <option>Makanan</option>
-  <option>Minuman</option>
-  <option>Lainnya</option>
+<h3>➕ Input Penjualan</h3>
+
+<select id="menuSelect">
+  <option value="">-- Pilih Menu --</option>
 </select>
-<input id="menuHarga" type="number" placeholder="Harga" />
-<button onclick="tambahMenu()">Simpan Menu</button>
+
+<input id="kategori" placeholder="Kategori" disabled />
+<input id="harga" type="number" placeholder="Harga" disabled />
+<input id="qty" type="number" placeholder="Qty" />
+<input id="total" placeholder="Total" disabled />
+
+<button onclick="simpanPenjualan()">Simpan Penjualan</button>
 
 <hr/>
-
-<h3>📋 Daftar Menu</h3>
-<ul id="daftarMenu"></ul>
+<button onclick="loadMenu()">🔄 Refresh Menu</button>
 
 <script src="app.js"></script>
 </body>
