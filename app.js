@@ -1,27 +1,65 @@
 let db;
-const request = indexedDB.open("cibaicibi_db", 1);
+const request = indexedDB.open("cibaicibi_db", 2);
 
 request.onupgradeneeded = e => {
   db = e.target.result;
-  db.createObjectStore("penjualan", { keyPath: "id", autoIncrement: true });
+  if (!db.objectStoreNames.contains("menu")) {
+    db.createObjectStore("menu", { keyPath: "id", autoIncrement: true });
+  }
+  if (!db.objectStoreNames.contains("penjualan")) {
+    db.createObjectStore("penjualan", { keyPath: "id", autoIncrement: true });
+  }
 };
 
-request.onsuccess = e => db = e.target.result;
+request.onsuccess = e => {
+  db = e.target.result;
+  loadMenu();
+};
 
-function simpan() {
-  const menu = document.getElementById("menu").value;
-  const kategori = document.getElementById("kategori").value;
-  const qty = Number(document.getElementById("qty").value);
-  const harga = Number(document.getElementById("harga").value);
-  const total = qty * harga;
+function tambahMenu() {
+  const nama = menuNama.value.trim();
+  const kategori = menuKategori.value;
+  const harga = Number(menuHarga.value);
 
-  document.getElementById("total").value = total;
+  if (!nama || !harga) {
+    alert("Nama & harga wajib diisi");
+    return;
+  }
 
-  const tx = db.transaction("penjualan", "readwrite");
-  tx.objectStore("penjualan").add({
-    tanggal: new Date().toISOString().slice(0,10),
-    menu, kategori, qty, harga, total
-  });
+  const tx = db.transaction("menu", "readwrite");
+  tx.objectStore("menu").add({ nama, kategori, harga });
 
-  alert("Data tersimpan");
+  tx.oncomplete = () => {
+    menuNama.value = "";
+    menuHarga.value = "";
+    loadMenu();
+  };
+}
+
+function loadMenu() {
+  const tx = db.transaction("menu", "readonly");
+  const store = tx.objectStore("menu");
+  const req = store.getAll();
+
+  req.onsuccess = () => {
+    const ul = document.getElementById("daftarMenu");
+    ul.innerHTML = "";
+
+    req.result.forEach(m => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        ${m.nama} (${m.kategori}) - Rp${m.harga}
+        <button onclick="hapusMenu(${m.id})">❌</button>
+      `;
+      ul.appendChild(li);
+    });
+  };
+}
+
+function hapusMenu(id) {
+  if (!confirm("Hapus menu ini?")) return;
+
+  const tx = db.transaction("menu", "readwrite");
+  tx.objectStore("menu").delete(id);
+  tx.oncomplete = loadMenu;
 }
