@@ -33,6 +33,19 @@ th,td{border-bottom:1px solid #ddd;padding:6px}
 <button onclick="backupKeDrive()">Backup Sekarang</button>
 <p id="statusBackup">Belum login</p>
 </div>
+  
+<div class="box">
+  <h2>💾 Backup & Restore Local</h2>
+
+  <button onclick="backupLocal()">⬇️ Backup ke File</button>
+
+  <input type="file" id="restoreFile" accept=".json">
+  <button onclick="restoreLocal()">⬆️ Restore dari File</button>
+
+  <p style="font-size:13px;color:#555">
+    Backup ini disimpan sebagai file dan bisa dipindah ke HP lain.
+  </p>
+</div>
 
 <div class="box">
 <h2>📋 Menu Master</h2>
