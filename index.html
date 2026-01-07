@@ -15,9 +15,9 @@
 body{font-family:Arial;background:#f4f4f4;padding:16px}
 h1{text-align:center}
 .box{background:#fff;padding:12px;border-radius:8px;margin-bottom:16px}
-button,input{width:100%;padding:12px;margin:6px 0;font-size:16px}
+button,input,select{width:100%;padding:12px;margin:6px 0;font-size:16px}
 button{background:#2E7D32;color:#fff;border:none;border-radius:6px}
-.group-title{font-weight:bold;margin-top:8px}
+.group-title{font-weight:bold;margin-top:10px}
 ul{padding-left:18px}
 table{width:100%;border-collapse:collapse}
 th,td{border-bottom:1px solid #ddd;padding:6px}
@@ -28,23 +28,13 @@ th,td{border-bottom:1px solid #ddd;padding:6px}
 <h1>🍽️ Cibaicibi POS</h1>
 
 <div class="box">
-<h2>☁️ Backup Google Drive</h2>
+<h2>☁️ Backup</h2>
 <button onclick="loginGoogle()">Login Google</button>
-<button onclick="backupKeDrive()">Backup Sekarang</button>
+<button onclick="backupKeDrive()">Backup Google Drive</button>
+<button onclick="backupLocal()">Backup Local</button>
+<input type="file" id="restoreFile" accept=".json">
+<button onclick="restoreLocal()">Restore Local</button>
 <p id="statusBackup">Belum login</p>
-</div>
-  
-<div class="box">
-  <h2>💾 Backup & Restore Local</h2>
-
-  <button onclick="backupLocal()">⬇️ Backup ke File</button>
-
-  <input type="file" id="restoreFile" accept=".json">
-  <button onclick="restoreLocal()">⬆️ Restore dari File</button>
-
-  <p style="font-size:13px;color:#555">
-    Backup ini disimpan sebagai file dan bisa dipindah ke HP lain.
-  </p>
 </div>
 
 <div class="box">
@@ -57,7 +47,6 @@ th,td{border-bottom:1px solid #ddd;padding:6px}
 <option>Lainnya</option>
 </select>
 <button onclick="tambahMenu()">Tambah Menu</button>
-
 <input type="file" id="csvMenu" accept=".csv">
 <button onclick="importMenuCSV()">Import CSV</button>
 </div>
@@ -66,7 +55,6 @@ th,td{border-bottom:1px solid #ddd;padding:6px}
 <h2>🧾 Input Penjualan</h2>
 <input id="searchMenu" placeholder="Cari menu..." oninput="renderMenu()">
 <div id="menuList"></div>
-
 <input id="qty" type="number" placeholder="Qty">
 <button onclick="tambahKeKeranjang()">➕ Tambah</button>
 
