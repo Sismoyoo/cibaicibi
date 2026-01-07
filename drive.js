@@ -1,4 +1,4 @@
-const CLIENT_ID="ISI_CLIENT_ID_GOOGLE"
+const CLIENT_ID="60905494354-tgsocapra6irps1k6ourmhqgvj1h55s1.apps.googleusercontent.com"
 const SCOPE="https://www.googleapis.com/auth/drive.file"
 let token=null
 
