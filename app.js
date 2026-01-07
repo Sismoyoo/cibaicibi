@@ -170,5 +170,55 @@ function exportCSV() {
     };
 }
 
+// ===== IMPORT CSV MENU =====
+function importCSVMenu() {
+  const fileInput = document.getElementById("csvFile");
+  if (!fileInput.files.length) {
+    alert("Pilih file CSV dulu");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const text = e.target.result;
+    prosesCSVMenu(text);
+  };
+
+  reader.readAsText(file);
+}
+
+function prosesCSVMenu(text) {
+  const lines = text.split("\n");
+  if (lines.length < 2) {
+    alert("CSV kosong atau salah format");
+    return;
+  }
+
+  const tx = db.transaction("menu", "readwrite");
+  const store = tx.objectStore("menu");
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    const [nama, kategori, harga] = line.split(",");
+
+    if (!nama || !kategori || !harga) continue;
+
+    store.add({
+      nama: nama.trim(),
+      kategori: kategori.trim(),
+      harga: Number(harga.trim())
+    });
+  }
+
+  tx.oncomplete = () => {
+    alert("Import menu selesai");
+    loadMenu();
+  };
+}
+
 const chartHarianCtx = document.getElementById("chartHarian");
 const chartBulananCtx = document.getElementById("chartBulanan");
