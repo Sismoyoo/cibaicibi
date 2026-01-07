@@ -1,73 +1,95 @@
 let db;
-const request = indexedDB.open("cibaicibi_db", 3);
+const request = indexedDB.open("cibaicibi_db", 1);
 
 request.onupgradeneeded = e => {
   db = e.target.result;
-
-  if (!db.objectStoreNames.contains("menu")) {
-    db.createObjectStore("menu", { keyPath: "id", autoIncrement: true });
-  }
-  if (!db.objectStoreNames.contains("penjualan")) {
-    db.createObjectStore("penjualan", { keyPath: "id", autoIncrement: true });
-  }
+  db.createObjectStore("menu", { keyPath: "id", autoIncrement: true });
+  db.createObjectStore("penjualan", { keyPath: "id", autoIncrement: true });
 };
 
 request.onsuccess = e => {
   db = e.target.result;
   loadMenu();
+  loadMenuList();
 };
 
-// ================= MENU =================
+// ================= MENU MASTER =================
+function tambahMenu() {
+  const nama = menuNama.value.trim();
+  const kategori = menuKategori.value;
+  const harga = Number(menuHarga.value);
+
+  if (!nama || !harga) {
+    alert("Nama dan harga wajib diisi");
+    return;
+  }
+
+  const tx = db.transaction("menu", "readwrite");
+  tx.objectStore("menu").add({ nama, kategori, harga });
+
+  tx.oncomplete = () => {
+    menuNama.value = "";
+    menuHarga.value = "";
+    loadMenu();
+    loadMenuList();
+  };
+}
+
 function loadMenu() {
   const tx = db.transaction("menu", "readonly");
   const store = tx.objectStore("menu");
   const req = store.getAll();
 
   req.onsuccess = () => {
-    const select = document.getElementById("menuSelect");
-    select.innerHTML = `<option value="">-- Pilih Menu --</option>`;
-
+    menuSelect.innerHTML = `<option value="">-- Pilih Menu --</option>`;
     req.result.forEach(m => {
       const opt = document.createElement("option");
-      opt.value = m.id;
       opt.textContent = `${m.nama} - Rp${m.harga}`;
-      opt.dataset.harga = m.harga;
-      opt.dataset.kategori = m.kategori;
       opt.dataset.nama = m.nama;
-      select.appendChild(opt);
+      opt.dataset.kategori = m.kategori;
+      opt.dataset.harga = m.harga;
+      menuSelect.appendChild(opt);
     });
   };
 }
 
-document.addEventListener("change", e => {
-  if (e.target.id === "menuSelect") {
-    const opt = e.target.selectedOptions[0];
-    if (!opt || !opt.dataset.harga) return;
+function loadMenuList() {
+  const tx = db.transaction("menu", "readonly");
+  const store = tx.objectStore("menu");
+  const req = store.getAll();
 
-    document.getElementById("harga").value = opt.dataset.harga;
-    document.getElementById("kategori").value = opt.dataset.kategori;
-    hitungTotal();
-  }
-});
-
-document.getElementById("qty")?.addEventListener("input", hitungTotal);
-
-function hitungTotal() {
-  const qty = Number(document.getElementById("qty").value);
-  const harga = Number(document.getElementById("harga").value);
-  document.getElementById("total").value = qty * harga || "";
+  req.onsuccess = () => {
+    daftarMenu.innerHTML = "";
+    req.result.forEach(m => {
+      const li = document.createElement("li");
+      li.textContent = `${m.nama} (${m.kategori}) - Rp${m.harga}`;
+      daftarMenu.appendChild(li);
+    });
+  };
 }
 
-// ================= PENJUALAN =================
-function simpanPenjualan() {
-  const select = document.getElementById("menuSelect");
-  const opt = select.selectedOptions[0];
-  const qty = Number(document.getElementById("qty").value);
-  const harga = Number(document.getElementById("harga").value);
-  const total = qty * harga;
+// ================= INPUT PENJUALAN =================
+menuSelect.onchange = () => {
+  const opt = menuSelect.selectedOptions[0];
+  if (!opt || !opt.dataset.harga) return;
 
-  if (!opt || !opt.dataset.nama || qty <= 0) {
-    alert("Pilih menu & isi qty");
+  harga.value = opt.dataset.harga;
+  kategori.value = opt.dataset.kategori;
+  hitungTotal();
+};
+
+qty.oninput = hitungTotal;
+
+function hitungTotal() {
+  total.value = qty.value * harga.value || "";
+}
+
+function simpanPenjualan() {
+  const opt = menuSelect.selectedOptions[0];
+  const jumlah = Number(qty.value);
+
+  if (!opt || !jumlah) {
+    alert("Pilih menu dan isi qty");
     return;
   }
 
@@ -75,9 +97,9 @@ function simpanPenjualan() {
     tanggal: new Date().toISOString().slice(0, 10),
     menu: opt.dataset.nama,
     kategori: opt.dataset.kategori,
-    qty,
-    harga,
-    total,
+    harga: Number(opt.dataset.harga),
+    qty: jumlah,
+    total: jumlah * Number(opt.dataset.harga),
     waktu: Date.now()
   };
 
@@ -86,7 +108,7 @@ function simpanPenjualan() {
 
   tx.oncomplete = () => {
     alert("Penjualan tersimpan");
-    document.getElementById("qty").value = "";
-    document.getElementById("total").value = "";
+    qty.value = "";
+    total.value = "";
   };
 }
