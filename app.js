@@ -1,4 +1,4 @@
-let db;
+let db, chartHarian, chartBulanan;
 const request = indexedDB.open("cibaicibi_db", 1);
 
 request.onupgradeneeded = e => {
@@ -10,105 +10,165 @@ request.onupgradeneeded = e => {
 request.onsuccess = e => {
   db = e.target.result;
   loadMenu();
-  loadMenuList();
+  hitungHariIni();
+  grafik7Hari();
 };
 
-// ================= MENU MASTER =================
+// ===== MENU =====
 function tambahMenu() {
-  const nama = menuNama.value.trim();
-  const kategori = menuKategori.value;
-  const harga = Number(menuHarga.value);
-
-  if (!nama || !harga) {
-    alert("Nama dan harga wajib diisi");
-    return;
-  }
-
-  const tx = db.transaction("menu", "readwrite");
-  tx.objectStore("menu").add({ nama, kategori, harga });
-
-  tx.oncomplete = () => {
-    menuNama.value = "";
-    menuHarga.value = "";
-    loadMenu();
-    loadMenuList();
-  };
+  if (!menuNama.value || !menuHarga.value) return alert("Lengkapi menu");
+  db.transaction("menu", "readwrite")
+    .objectStore("menu")
+    .add({
+      nama: menuNama.value,
+      kategori: menuKategori.value,
+      harga: Number(menuHarga.value)
+    });
+  menuNama.value = "";
+  menuHarga.value = "";
+  setTimeout(loadMenu, 200);
 }
 
 function loadMenu() {
-  const tx = db.transaction("menu", "readonly");
-  const store = tx.objectStore("menu");
-  const req = store.getAll();
-
-  req.onsuccess = () => {
+  const store = db.transaction("menu").objectStore("menu");
+  store.getAll().onsuccess = e => {
     menuSelect.innerHTML = `<option value="">-- Pilih Menu --</option>`;
-    req.result.forEach(m => {
+    e.target.result.forEach(m => {
       const opt = document.createElement("option");
-      opt.textContent = `${m.nama} - Rp${m.harga}`;
-      opt.dataset.nama = m.nama;
-      opt.dataset.kategori = m.kategori;
-      opt.dataset.harga = m.harga;
-      menuSelect.appendChild(opt);
+      opt.text = `${m.nama} - Rp${m.harga}`;
+      opt.dataset = m;
+      menuSelect.add(opt);
     });
   };
 }
 
-function loadMenuList() {
-  const tx = db.transaction("menu", "readonly");
-  const store = tx.objectStore("menu");
-  const req = store.getAll();
-
-  req.onsuccess = () => {
-    daftarMenu.innerHTML = "";
-    req.result.forEach(m => {
-      const li = document.createElement("li");
-      li.textContent = `${m.nama} (${m.kategori}) - Rp${m.harga}`;
-      daftarMenu.appendChild(li);
-    });
-  };
-}
-
-// ================= INPUT PENJUALAN =================
+// ===== INPUT PENJUALAN =====
 menuSelect.onchange = () => {
-  const opt = menuSelect.selectedOptions[0];
-  if (!opt || !opt.dataset.harga) return;
-
-  harga.value = opt.dataset.harga;
-  kategori.value = opt.dataset.kategori;
+  const o = menuSelect.selectedOptions[0];
+  if (!o?.dataset?.harga) return;
+  harga.value = o.dataset.harga;
   hitungTotal();
 };
 
 qty.oninput = hitungTotal;
-
 function hitungTotal() {
   total.value = qty.value * harga.value || "";
 }
 
 function simpanPenjualan() {
-  const opt = menuSelect.selectedOptions[0];
-  const jumlah = Number(qty.value);
+  const o = menuSelect.selectedOptions[0];
+  if (!o || !qty.value) return alert("Lengkapi data");
 
-  if (!opt || !jumlah) {
-    alert("Pilih menu dan isi qty");
-    return;
+  db.transaction("penjualan", "readwrite")
+    .objectStore("penjualan")
+    .add({
+      tanggal: new Date().toISOString().slice(0,10),
+      total: Number(total.value)
+    });
+
+  qty.value = "";
+  total.value = "";
+  setTimeout(() => {
+    hitungHariIni();
+    grafik7Hari();
+  }, 200);
+}
+
+// ===== REKAP HARIAN =====
+function hitungHariIni() {
+  const today = new Date().toISOString().slice(0,10);
+  let sum = 0;
+  db.transaction("penjualan")
+    .objectStore("penjualan")
+    .getAll().onsuccess = e => {
+      e.target.result.forEach(p => {
+        if (p.tanggal === today) sum += p.total;
+      });
+      totalHari.innerText = sum;
+    };
+}
+
+// ===== GRAFIK 7 HARI =====
+function grafik7Hari() {
+  const dataMap = {};
+  const labels = [];
+  const values = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    labels.push(key.slice(5));
+    dataMap[key] = 0;
   }
 
-  const data = {
-    tanggal: new Date().toISOString().slice(0, 10),
-    menu: opt.dataset.nama,
-    kategori: opt.dataset.kategori,
-    harga: Number(opt.dataset.harga),
-    qty: jumlah,
-    total: jumlah * Number(opt.dataset.harga),
-    waktu: Date.now()
-  };
+  db.transaction("penjualan")
+    .objectStore("penjualan")
+    .getAll().onsuccess = e => {
+      e.target.result.forEach(p => {
+        if (dataMap[p.tanggal] !== undefined) {
+          dataMap[p.tanggal] += p.total;
+        }
+      });
 
-  const tx = db.transaction("penjualan", "readwrite");
-  tx.objectStore("penjualan").add(data);
+      Object.values(dataMap).forEach(v => values.push(v));
 
-  tx.oncomplete = () => {
-    alert("Penjualan tersimpan");
-    qty.value = "";
-    total.value = "";
-  };
+      if (chartHarian) chartHarian.destroy();
+      chartHarian = new Chart(chartHarianCtx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [{ data: values }]
+        }
+      });
+    };
 }
+
+// ===== GRAFIK BULANAN =====
+function grafikBulanan() {
+  const bulan = document.getElementById("bulan").value;
+  if (!bulan) return;
+
+  const map = {};
+  db.transaction("penjualan")
+    .objectStore("penjualan")
+    .getAll().onsuccess = e => {
+      e.target.result.forEach(p => {
+        if (p.tanggal.startsWith(bulan)) {
+          map[p.tanggal] = (map[p.tanggal] || 0) + p.total;
+        }
+      });
+
+      const labels = Object.keys(map).sort();
+      const values = labels.map(l => map[l]);
+
+      if (chartBulanan) chartBulanan.destroy();
+      chartBulanan = new Chart(chartBulananCtx, {
+        type: "bar",
+        data: {
+          labels: labels.map(l => l.slice(8)),
+          datasets: [{ data: values }]
+        }
+      });
+    };
+}
+
+// ===== EXPORT =====
+function exportCSV() {
+  db.transaction("penjualan")
+    .objectStore("penjualan")
+    .getAll().onsuccess = e => {
+      let csv = "Tanggal,Total\n";
+      e.target.result.forEach(p => {
+        csv += `${p.tanggal},${p.total}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "cibaicibi.csv";
+      a.click();
+    };
+}
+
+const chartHarianCtx = document.getElementById("chartHarian");
+const chartBulananCtx = document.getElementById("chartBulanan");
