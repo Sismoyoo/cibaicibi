@@ -217,3 +217,39 @@ loadMenu(); updateLaporan()
 }
 r.readAsText(f)
 }
+// ===== SYNC MENU DARI GITHUB =====
+function syncMenuGithub() {
+  if (!confirm("Menu lama akan ditimpa dari GitHub. Lanjutkan?")) return;
+
+  const url = "https://raw.githubusercontent.com/sismoyoo/cibaicibi/main/menu_sawah.csv";
+
+  fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error("Gagal ambil file");
+      return res.text();
+    })
+    .then(csv => {
+      const rows = csv.split("\n");
+      const store = db.transaction("menu", "readwrite").objectStore("menu");
+
+      store.clear(); // TIMPA MENU LAMA
+
+      for (let i = 1; i < rows.length; i++) {
+        const [nama, kategori, harga] = rows[i].split(",");
+        if (!nama || !harga) continue;
+
+        store.add({
+          nama: nama.trim(),
+          kategori: (kategori || "Makanan").trim(),
+          harga: Number(harga),
+          favorit: false
+        });
+      }
+
+      toast("Menu berhasil sync dari GitHub");
+      loadMenu();
+    })
+    .catch(err => {
+      alert("Gagal sync menu: " + err.message);
+    });
+}
