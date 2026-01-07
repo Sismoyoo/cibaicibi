@@ -1,4 +1,4 @@
-const CLIENT_ID="ISI_CLIENT_ID_KAMU"
+const CLIENT_ID="ISI_CLIENT_ID_GOOGLE"
 const SCOPE="https://www.googleapis.com/auth/drive.file"
 let token=null
 
