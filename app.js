@@ -1,7 +1,7 @@
 let db, chart
 let menu=[], keranjang=[], dipilih=null
 
-const GITHUB_MENU_URL = "ISI_URL_RAW_CSV_GITHUB"
+const GITHUB_MENU_URL = "Ihttps://raw.githubusercontent.com/sismoyoo/cibaicibi/menu_sawah.csv"
 
 const req=indexedDB.open("cibaicibi_db",6)
 req.onupgradeneeded=e=>{
