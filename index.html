@@ -7,9 +7,7 @@
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2E7D32">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
 :root{
@@ -18,174 +16,91 @@
   --card:#ffffff;
   --border:#e0e0e0;
 }
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,Arial;background:var(--bg)}
+header{position:sticky;top:0;background:var(--card);padding:14px;font-size:20px;font-weight:700;border-bottom:1px solid var(--border)}
+#darkToggle{float:right;border:none;background:none;font-size:20px}
 
-/* ===== BASE ===== */
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,Arial;
-  background:var(--bg);
-}
-h2,h3{margin:6px 0}
-.box{
-  background:var(--card);
-  padding:12px;
-  margin:10px;
-  border-radius:14px;
-}
+.app{display:flex;gap:10px;padding:10px}
+@media(orientation:portrait){.app{flex-direction:column}}
+@media(orientation:landscape){.app{flex-direction:row}}
 
-/* ===== HEADER ===== */
-header{
-  position:sticky;
-  top:0;
-  background:var(--card);
-  padding:14px;
-  font-size:20px;
-  font-weight:bold;
-  border-bottom:1px solid var(--border);
-  z-index:10;
-}
+.panel{background:var(--card);border-radius:16px;padding:12px;flex:1}
 
-/* ===== INPUT ===== */
-input,select,button{
-  width:100%;
-  padding:12px;
-  font-size:16px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  margin-top:6px;
-}
-button{
-  background:var(--primary);
-  color:#fff;
-  border:none;
-}
+input,button{width:100%;padding:12px;font-size:16px;border-radius:12px;border:1px solid var(--border);margin-top:6px}
+button{background:var(--primary);color:#fff;border:none}
 
-/* ===== SEARCH ===== */
-#searchMenu{
-  background:#fafafa;
-}
+.menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.group-title{grid-column:1/-1;font-size:13px;font-weight:700;color:#555;margin-top:12px}
+.menu-btn{background:#fff;border:1px solid var(--border);border-radius:16px;padding:12px;text-align:center}
+.menu-btn.active{background:var(--primary);color:#fff}
+.menu-btn small{display:block;font-size:12px;opacity:.7}
 
-/* ===== MENU GRID ===== */
-.menu-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-
-.group-title{
-  grid-column:1/-1;
-  font-size:14px;
-  font-weight:bold;
-  color:#555;
-  margin-top:12px;
-}
-
-/* ===== MENU BUTTON ===== */
-.menu-btn{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:14px 10px;
-  font-size:15px;
-  text-align:center;
-  box-shadow:0 2px 4px rgba(0,0,0,0.06);
-}
-.menu-btn.active{
-  background:var(--primary);
-  color:#fff;
-}
-.menu-btn small{
-  display:block;
-  font-size:12px;
-  opacity:0.7;
-}
-
-/* ===== BADGE ===== */
-.badge{
-  display:inline-block;
-  padding:2px 8px;
-  border-radius:999px;
-  font-size:11px;
-  margin-bottom:4px;
-}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px}
 .badge.makanan{background:#FFE0B2}
 .badge.minuman{background:#BBDEFB}
 
-/* ===== KERANJANG ===== */
-#keranjangList li{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
-}
-.qty-btn{
-  background:#ddd;
-  color:#000;
-  border-radius:50%;
-  width:28px;
-  height:28px;
-  padding:0;
-  font-size:18px;
-}
+#keranjangList{list-style:none;padding:0}
+#keranjangList li{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.qty{display:flex;gap:6px;align-items:center}
+.qty-btn{width:28px;height:28px;border-radius:50%;background:#eee;color:#000;font-size:18px;padding:0}
+.del{background:#ffebee;color:#c62828;padding:6px 10px;border-radius:8px}
 
-/* ===== TOTAL ===== */
-.total-box{
-  font-size:26px;
-  font-weight:bold;
-  color:var(--primary);
-  text-align:right;
-  margin-top:10px;
-}
+.total{font-size:26px;font-weight:800;color:var(--primary);text-align:right}
+.save-btn{font-size:20px;padding:16px;border-radius:16px}
 
-/* ===== SIMPAN ===== */
-.save-btn{
-  margin-top:10px;
-  font-size:20px;
-  padding:16px;
-  border-radius:16px;
-}
+.box{background:var(--card);margin:10px;padding:12px;border-radius:16px}
 
-/* ===== TOAST ===== */
-#popup{
-  display:none;
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--primary);
-  color:#fff;
-  padding:12px 20px;
-  border-radius:999px;
-  z-index:999;
+body.dark{
+  --bg:#121212;--card:#1e1e1e;--border:#333;--primary:#81C784;
+  color:#eee
 }
+body.dark input{background:#1e1e1e;color:#eee;border:1px solid #333}
+body.dark .menu-btn{background:#2a2a2a;color:#eee}
 </style>
 </head>
 
 <body>
+<header>
+  🍽️ Cibaicibi POS
+  <button id="darkToggle" onclick="toggleDark()">🌙</button>
+</header>
 
-<header>🍽️ Cibaicibi POS</header>
+<div class="app">
 
-<!-- INPUT PENJUALAN -->
-<div class="box">
-  <input id="searchMenu" placeholder="🔍 Cari menu..." oninput="renderMenu()">
-  <div id="menuList" class="menu-grid"></div>
+  <div class="panel">
+    <input id="searchMenu" placeholder="🔍 Cari menu..." oninput="renderMenu()">
+    <div id="menuList" class="menu-grid"></div>
+    <input id="qty" type="number" placeholder="Qty">
+    <button onclick="tambahKeKeranjang()">➕ Tambah</button>
+  </div>
 
-  <input id="qty" type="number" placeholder="Qty">
-  <button onclick="tambahKeKeranjang()">➕ Tambah ke Keranjang</button>
+  <div class="panel">
+    <h3>🛒 Keranjang</h3>
+    <ul id="keranjangList"></ul>
+    <div class="total">Rp <span id="totalAll">0</span></div>
+    <button class="save-btn" onclick="simpanTransaksi()">💾 SIMPAN</button>
+  </div>
+
 </div>
 
-<!-- KERANJANG -->
 <div class="box">
-  <h3>🛒 Keranjang</h3>
-  <ul id="keranjangList"></ul>
-  <div class="total-box">Rp <span id="totalAll">0</span></div>
-  <button class="save-btn" onclick="simpanTransaksi()">💾 SIMPAN</button>
+  <h3>📊 Laporan</h3>
+  <p>Omzet 30 Hari: Rp <b id="omzet30">0</b></p>
+  <canvas id="chart7"></canvas>
+</div>
+
+<div class="box">
+  <h3>☁️ Backup & Sync</h3>
+  <button onclick="backupLocal()">Backup Local</button>
+  <input type="file" id="restoreFile">
+  <button onclick="restoreLocal()">Restore</button>
+  <button onclick="syncMenuGithub()">Sync Menu GitHub</button>
 </div>
 
 <div id="popup">✔</div>
 
 <script src="app.js"></script>
-<script src="drive.js"></script>
 <script>
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("service-worker.js")
