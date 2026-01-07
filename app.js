@@ -1,6 +1,15 @@
 let db, chart7hari;
 let keranjang = [];
 
+// ===== POPUP =====
+function showPopup(pesan) {
+  const pop = document.getElementById("popupSuccess");
+  pop.innerText = "✔ " + pesan;
+  pop.style.display = "block";
+  setTimeout(() => pop.style.display = "none", 1500);
+}
+
+// ===== DATABASE =====
 const req = indexedDB.open("cibaicibi_db", 1);
 
 req.onupgradeneeded = e => {
@@ -19,20 +28,21 @@ req.onsuccess = e => {
 
 // ===== MENU MASTER =====
 function tambahMenu() {
-  if (!menuNama.value || !menuHarga.value) return alert("Lengkapi menu");
+  if (!menuNama.value || !menuHarga.value) return;
   db.transaction("menu","readwrite").objectStore("menu").add({
     nama: menuNama.value,
     kategori: menuKategori.value,
     harga: Number(menuHarga.value)
   });
   menuNama.value=""; menuHarga.value="";
+  showPopup("Menu berhasil ditambahkan");
   setTimeout(loadMenu,200);
 }
 
 // ===== BULK CSV =====
 function importMenuCSV() {
   const file = csvMenu.files[0];
-  if (!file) return alert("Pilih CSV");
+  if (!file) return;
 
   const reader = new FileReader();
   reader.onload = e => {
@@ -46,7 +56,7 @@ function importMenuCSV() {
         harga:Number(h.trim())
       });
     }
-    alert("Import menu selesai");
+    showPopup("Import menu selesai");
     loadMenu();
   };
   reader.readAsText(file);
@@ -66,14 +76,15 @@ function loadMenu() {
   };
 }
 
-menuSelect.onchange = () => harga.value =
-  menuSelect.selectedOptions[0]?.dataset.harga || "";
+menuSelect.onchange = () => {
+  harga.value = menuSelect.selectedOptions[0]?.dataset.harga || "";
+};
 
 // ===== KERANJANG =====
 function tambahKeKeranjang() {
   const o = menuSelect.selectedOptions[0];
   const q = Number(qty.value);
-  if (!o || q<=0) return alert("Pilih menu & qty");
+  if (!o || q<=0) return;
 
   keranjang.push({
     menu:o.dataset.nama,
@@ -83,6 +94,7 @@ function tambahKeKeranjang() {
   });
   qty.value="";
   renderKeranjang();
+  showPopup("Menu ditambahkan ke keranjang");
 }
 
 function renderKeranjang() {
@@ -105,18 +117,20 @@ function hapusItem(i) {
 
 // ===== SIMPAN TRANSAKSI =====
 function simpanTransaksi() {
-  if (keranjang.length===0) return alert("Keranjang kosong");
+  if (keranjang.length===0) return;
+
   db.transaction("transaksi","readwrite").objectStore("transaksi").add({
     tanggal:new Date().toISOString().slice(0,10),
     items:keranjang,
     total:keranjang.reduce((s,i)=>s+i.subtotal,0)
   });
+
   keranjang=[];
   renderKeranjang();
   hitungOmzet30Hari();
   grafik7Hari();
   top10Menu();
-  alert("Transaksi tersimpan");
+  showPopup("Transaksi berhasil disimpan");
 }
 
 // ===== OMZET 30 HARI =====
@@ -147,13 +161,12 @@ function grafik7Hari() {
     });
     Object.values(map).forEach(v=>data.push(v));
     if(chart7hari) chart7hari.destroy();
-    chart7hari=new Chart(chart7hariCtx,{
+    chart7hari=new Chart(document.getElementById("chart7hari"),{
       type:"line",
       data:{labels,datasets:[{data}]}
     });
   };
 }
-const chart7hariCtx=document.getElementById("chart7hari");
 
 // ===== TOP 10 MENU =====
 function top10Menu() {
