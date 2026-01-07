@@ -1,44 +1,82 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cibaicibi</title>
 
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#2E7D32" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2E7D32">
 
   <style>
-    body { font-family: Arial; padding: 16px; background: #f4f4f4; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 16px;
+    }
     h1 { text-align: center; }
+    h2 { margin-top: 24px; }
     input, select, button {
-      width: 100%; padding: 12px; margin: 6px 0; font-size: 16px;
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0;
+      font-size: 16px;
     }
     button {
-      background: #2E7D32; color: white; border: none; border-radius: 6px;
+      background: #2E7D32;
+      color: white;
+      border: none;
+      border-radius: 6px;
     }
+    .box {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; }
   </style>
 </head>
 <body>
 
 <h1>🍽️ Cibaicibi</h1>
 
-<h3>➕ Input Penjualan</h3>
+<div class="box">
+  <h2>📋 Menu Master</h2>
+  <input id="menuNama" placeholder="Nama Menu">
+  <select id="menuKategori">
+    <option>Makanan</option>
+    <option>Minuman</option>
+    <option>Lainnya</option>
+  </select>
+  <input id="menuHarga" type="number" placeholder="Harga">
+  <button onclick="tambahMenu()">Simpan Menu</button>
 
-<select id="menuSelect">
-  <option value="">-- Pilih Menu --</option>
-</select>
+  <ul id="daftarMenu"></ul>
+</div>
 
-<input id="kategori" placeholder="Kategori" disabled />
-<input id="harga" type="number" placeholder="Harga" disabled />
-<input id="qty" type="number" placeholder="Qty" />
-<input id="total" placeholder="Total" disabled />
+<div class="box">
+  <h2>➕ Input Penjualan</h2>
 
-<button onclick="simpanPenjualan()">Simpan Penjualan</button>
+  <select id="menuSelect">
+    <option value="">-- Pilih Menu --</option>
+  </select>
 
-<hr/>
-<button onclick="loadMenu()">🔄 Refresh Menu</button>
+  <input id="kategori" placeholder="Kategori" disabled>
+  <input id="harga" placeholder="Harga" disabled>
+  <input id="qty" type="number" placeholder="Qty">
+  <input id="total" placeholder="Total" disabled>
+
+  <button onclick="simpanPenjualan()">Simpan Penjualan</button>
+</div>
 
 <script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
 </body>
 </html>
