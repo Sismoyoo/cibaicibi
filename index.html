@@ -21,6 +21,75 @@ button{background:#2E7D32;color:#fff;border:none;border-radius:6px}
 ul{padding-left:18px}
 table{width:100%;border-collapse:collapse}
 th,td{border-bottom:1px solid #ddd;padding:6px}
+  
+/* ===== HEADER ===== */
+header{
+  position:sticky;
+  top:0;
+  background:#fff;
+  padding:12px;
+  font-size:20px;
+  font-weight:bold;
+  border-bottom:1px solid #ddd;
+  z-index:10;
+}
+
+/* ===== SEARCH ===== */
+#searchMenu{
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+
+/* ===== GRID MENU ===== */
+.menu-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.menu-grid .group-title{
+  grid-column:1/-1;
+  font-size:14px;
+  color:#555;
+  margin-top:12px;
+}
+
+.menu-grid button{
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:14px;
+  padding:14px 10px;
+  font-size:15px;
+  text-align:center;
+  box-shadow:0 2px 4px rgba(0,0,0,0.05);
+}
+
+.menu-grid button:active{
+  background:#2E7D32;
+  color:#fff;
+  transform:scale(0.97);
+}
+
+/* ===== KERANJANG ===== */
+#keranjangList li{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+
+#totalAll{
+  font-size:22px;
+  color:#2E7D32;
+}
+
+/* ===== SIMPAN ===== */
+button.save-btn{
+  background:#2E7D32;
+  font-size:18px;
+  padding:14px;
+  border-radius:14px;
+}
+
 </style>
 </head>
 
@@ -55,14 +124,14 @@ th,td{border-bottom:1px solid #ddd;padding:6px}
 <div class="box">
 <h2>🧾 Input Penjualan</h2>
 <input id="searchMenu" placeholder="Cari menu..." oninput="renderMenu()">
-<div id="menuList"></div>
+<div id="menuList" class="menu-grid"></div>
 <input id="qty" type="number" placeholder="Qty">
 <button onclick="tambahKeKeranjang()">➕ Tambah</button>
 
 <h3>🛒 Keranjang</h3>
 <ul id="keranjangList"></ul>
 <b>Total: Rp <span id="totalAll">0</span></b>
-<button onclick="simpanTransaksi()">💾 Simpan Transaksi</button>
+<button class="save-btn" onclick="simpanTransaksi()">💾 SIMPAN</button>
 </div>
 
 <div class="box">
