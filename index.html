@@ -12,6 +12,31 @@ html,body{
   font-family:-apple-system,BlinkMacSystemFont,Arial;
   background:#f4f4f4;
 }
+.menu-filter{
+  display:flex;
+  gap:6px;
+  margin-bottom:6px;
+}
+.menu-filter select{
+  flex:1;
+}
+.menu-filter input{
+  flex:2;
+}
+.laporan-scroll{
+  overflow-y:auto;
+  max-height:260px;
+  padding-right:4px;
+}
+.owner b{
+  display:block;
+  margin-top:8px;
+}
+.owner div,
+.owner li{
+  font-size:14px;
+}
+
 body.dark{background:#121212;color:#eee}
 
 /* HEADER */
@@ -159,13 +184,15 @@ button{
 
   <!-- MENU -->
   <div class="panel menu-panel">
-    <select id="filterKategori" onchange="renderMenu()">
-      <option value="">Semua Kategori</option>
-      <option value="Makanan">Makanan</option>
-      <option value="Minuman">Minuman</option>
-    </select>
+    <div class="menu-filter">
+  <select id="filterKategori" onchange="renderMenu()">
+    <option value="">Semua</option>
+    <option value="Makanan">Makanan</option>
+    <option value="Minuman">Minuman</option>
+  </select>
 
-    <input id="searchMenu" placeholder="🔍 Cari menu..." oninput="renderMenu()">
+  <input id="searchMenu" placeholder="🔍 Cari..." oninput="renderMenu()">
+</div>
 
     <div class="menu-scroll">
       <div id="menuList" class="menu-grid"></div>
@@ -181,7 +208,7 @@ button{
   <button onclick="simpanTransaksi()">SIMPAN</button>
 </div>
 
-    <div class="owner">
+    <div class="owner laporan-scroll">
       <b>📅 Filter Tanggal</b>
       <input type="date" id="tglMulai">
       <input type="date" id="tglAkhir">
