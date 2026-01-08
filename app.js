@@ -19,26 +19,39 @@ window.onload=()=>{
 }
 
 function seedMenu(){
-  menu=[
-    {nama:"Ayam Goreng",harga:12000},
-    {nama:"Ayam Bakar",harga:15000},
-    {nama:"Nasi Goreng",harga:14000},
-    {nama:"Es Teh",harga:4000}
+  menu = [
+    { nama:"Ayam Goreng", harga:12000, kategori:"Makanan" },
+    { nama:"Ayam Bakar", harga:15000, kategori:"Makanan" },
+    { nama:"Nasi Goreng", harga:14000, kategori:"Makanan" },
+    { nama:"Mie Goreng", harga:13000, kategori:"Makanan" },
+    { nama:"Es Teh", harga:4000, kategori:"Minuman" },
+    { nama:"Es Jeruk", harga:6000, kategori:"Minuman" }
   ]
-  store.set("menu",menu)
+  store.set("menu", menu)
+  renderMenu()
 }
 
 /* MENU */
 function renderMenu(){
-  const key=search.value.toLowerCase()
-  menuList.innerHTML=""
-  menu.filter(m=>m.nama.toLowerCase().includes(key))
-      .forEach(m=>{
-    const b=document.createElement("button")
-    b.className="menu-btn"
-    b.innerHTML=`${m.nama}<br><small>Rp${m.harga}</small>`
-    b.onclick=()=>add(m)
-    menuList.appendChild(b)
+const key = searchMenu.value.toLowerCase()
+const kat = filterKategori.value
+
+menu
+  .filter(m => {
+    const namaOk = m.nama.toLowerCase().includes(key)
+    const kategoriMenu = m.kategori || "Makanan"
+    const kategoriOk = !kat || kategoriMenu === kat
+    return namaOk && kategoriOk
+  })
+  .forEach(m=>{
+    const btn = document.createElement("button")
+    btn.className = "menu-btn"
+    btn.innerHTML = `
+      ${m.nama}<br>
+      <small>${m.kategori || "Makanan"} • Rp${m.harga}</small>
+    `
+    btn.onclick = () => add(m)
+    menuList.appendChild(btn)
   })
 }
 
@@ -118,14 +131,22 @@ function syncMenuGithub(){
     .then(r=>r.text())
     .then(csv=>{
       const rows=csv.trim().split("\n")
-      menu=[]
-      for(let i=1;i<rows.length;i++){
-        const [n,,h]=rows[i].split(",")
-        if(n&&h)menu.push({nama:n.trim(),harga:+h})
-      }
-      store.set("menu",menu)
-      renderMenu()
-      alert("Menu tersync")
+      menu = []
+
+for(let i=1;i<rows.length;i++){
+  const [n,k,h] = rows[i].split(",")
+  if(n && h){
+    menu.push({
+      nama: n.trim(),
+      harga: Number(h),
+      kategori: (k || "Makanan").trim()
+    })
+  }
+}
+
+store.set("menu",menu)
+renderMenu()
+alert("Menu tersync")
     })
 }
 
