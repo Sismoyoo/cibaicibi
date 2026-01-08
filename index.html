@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cibaicibi POS – Phase 2</title>
+<title>Cibaicibi POS – Phase 3</title>
 
 <style>
 *{box-sizing:border-box}
@@ -137,86 +137,12 @@ header{
     <div id="cartList"></div>
     <div class="total">Rp <span id="total">0</span></div>
     <div class="footer">
-      <button onclick="simpan()">SIMPAN</button>
+      <button onclick="simpanTransaksi()">SIMPAN</button>
     </div>
   </div>
 
 </div>
 
-<script>
-/* ===== DATA DUMMY ===== */
-const menu = [
-  {nama:"Ayam Goreng", harga:12000},
-  {nama:"Ayam Bakar", harga:15000},
-  {nama:"Ayam Rica Rica", harga:18000},
-  {nama:"Nasi Goreng", harga:14000},
-  {nama:"Mie Goreng", harga:13000},
-  {nama:"Es Teh", harga:4000},
-  {nama:"Es Jeruk", harga:6000},
-  {nama:"Kopi Hitam", harga:8000},
-]
-
-let cart = []
-
-/* ===== RENDER MENU ===== */
-function renderMenu(){
-  menuList.innerHTML=""
-  menu.forEach((m,i)=>{
-    const btn=document.createElement("button")
-    btn.className="menu-btn"
-    btn.innerHTML=`${m.nama}<br><small>Rp${m.harga}</small>`
-    btn.onclick=()=>tambah(i)
-    menuList.appendChild(btn)
-  })
-}
-
-/* ===== CART ===== */
-function tambah(i){
-  const item=menu[i]
-  const found=cart.find(c=>c.nama===item.nama)
-  if(found){
-    found.qty++
-  }else{
-    cart.push({nama:item.nama,harga:item.harga,qty:1})
-  }
-  renderCart()
-}
-
-function renderCart(){
-  cartList.innerHTML=""
-  let total=0
-  cart.forEach((c,i)=>{
-    total+=c.qty*c.harga
-    cartList.innerHTML+=`
-      <div class="cart-item">
-        <div>${c.nama}</div>
-        <div class="qty">
-          <button onclick="ubah(${i},-1)">−</button>
-          <b>${c.qty}</b>
-          <button onclick="ubah(${i},1)">+</button>
-        </div>
-      </div>
-    `
-  })
-  document.getElementById("total").innerText=total
-}
-
-function ubah(i,delta){
-  cart[i].qty+=delta
-  if(cart[i].qty<=0) cart.splice(i,1)
-  renderCart()
-}
-
-/* ===== SIMPAN (DUMMY) ===== */
-function simpan(){
-  alert("Transaksi disimpan (fase 2)")
-  cart=[]
-  renderCart()
-}
-
-/* INIT */
-renderMenu()
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
