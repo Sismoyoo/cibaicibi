@@ -5,18 +5,18 @@ let db
 let menu = []
 let cart = []
 
-const DB_NAME = "cibaicibi_db"
+const DB_NAME = "cibaicibi_phase3"
 const DB_VERSION = 1
 
 const req = indexedDB.open(DB_NAME, DB_VERSION)
 
 req.onupgradeneeded = e => {
-  db = e.target.result
-  if (!db.objectStoreNames.contains("menu")) {
-    db.createObjectStore("menu", { keyPath: "id", autoIncrement: true })
+  const database = e.target.result
+  if (!database.objectStoreNames.contains("menu")) {
+    database.createObjectStore("menu", { keyPath: "id", autoIncrement: true })
   }
-  if (!db.objectStoreNames.contains("transaksi")) {
-    db.createObjectStore("transaksi", { keyPath: "id", autoIncrement: true })
+  if (!database.objectStoreNames.contains("transaksi")) {
+    database.createObjectStore("transaksi", { keyPath: "id", autoIncrement: true })
   }
 }
 
@@ -25,8 +25,8 @@ req.onsuccess = e => {
   initMenu()
 }
 
-req.onerror = () => {
-  alert("Gagal membuka database")
+req.onerror = e => {
+  alert("DB Error: " + e.target.error)
 }
 
 /* =====================
