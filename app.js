@@ -125,16 +125,51 @@ function renderGrafik(data){
 
 /* CSV */
 function exportCSV(){
-  const trx=store.get("trx")
-  let csv="tanggal,omzet\n"
+  const trx = store.get("trx")
+
+  const mulai = tglMulai.value ? new Date(tglMulai.value).getTime() : 0
+  const akhir = tglAkhir.value
+    ? new Date(tglAkhir.value).getTime() + 86399999
+    : Infinity
+
+  // Struktur: tanggal -> { omzetHarian, menu:{ nama:{qty, omzet} } }
+  const data = {}
+
   trx.forEach(t=>{
-    const d=new Date(t.t).toISOString().slice(0,10)
-    const s=t.items.reduce((a,i)=>a+i.qty*i.harga,0)
-    csv+=`${d},${s}\n`
+    if(t.t < mulai || t.t > akhir) return
+
+    const tanggal = new Date(t.t).toISOString().slice(0,10)
+    if(!data[tanggal]){
+      data[tanggal] = { omzetHarian:0, menu:{} }
+    }
+
+    t.items.forEach(i=>{
+      const omzetItem = i.qty * i.harga
+      data[tanggal].omzetHarian += omzetItem
+
+      if(!data[tanggal].menu[i.nama]){
+        data[tanggal].menu[i.nama] = { qty:0, omzet:0 }
+      }
+
+      data[tanggal].menu[i.nama].qty += i.qty
+      data[tanggal].menu[i.nama].omzet += omzetItem
+    })
   })
-  const a=document.createElement("a")
-  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}))
-  a.download="laporan.csv"
+
+  let csv = "tanggal,menu,jumlah_terjual,omzet_menu,omzet_harian\n"
+
+  Object.entries(data)
+    .sort((a,b)=>a[0].localeCompare(b[0]))
+    .forEach(([tgl,info])=>{
+      Object.entries(info.menu).forEach(([nama,m])=>{
+        csv += `${tgl},${nama},${m.qty},${m.omzet},${info.omzetHarian}\n`
+      })
+    })
+
+  const blob = new Blob([csv],{type:"text/csv"})
+  const a = document.createElement("a")
+  a.href = URL.createObjectURL(blob)
+  a.download = "laporan_penjualan_detail.csv"
   a.click()
 }
 
