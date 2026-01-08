@@ -1,7 +1,12 @@
 /* =====================
-   STORAGE ABSTRACTION
+   CONFIG
 ===================== */
+const GITHUB_MENU_URL =
+"https://raw.githubusercontent.com/Sismoyoo/cibaicibi/main/menu_sawah.csv"
 
+/* =====================
+   STORAGE (SAFE iOS)
+===================== */
 const storage = {
   getMenu(){
     return JSON.parse(localStorage.getItem("menu") || "[]")
@@ -34,6 +39,7 @@ function init(){
     seedMenu()
   }
 }
+window.onload = init
 
 function seedMenu(){
   menu = [
@@ -91,7 +97,7 @@ function renderCart(){
       </div>
     `
   })
-  totalEl.innerText=total
+  document.getElementById("total").innerText=total
 }
 
 function ubahQty(i,d){
@@ -114,10 +120,68 @@ function simpanTransaksi(){
   storage.saveTransaksi(data)
   cart=[]
   renderCart()
-  alert("Transaksi tersimpan (offline)")
+  alert("Transaksi tersimpan")
 }
 
 /* =====================
-   START
+   SYNC GITHUB CSV
 ===================== */
-init()
+function syncMenuGithub(){
+  if(!confirm("Menu lama akan ditimpa")) return
+
+  fetch(GITHUB_MENU_URL)
+    .then(r=>{
+      if(!r.ok) throw new Error("CSV tidak ditemukan")
+      return r.text()
+    })
+    .then(csv=>{
+      const rows = csv.trim().split("\n")
+      const newMenu = []
+
+      for(let i=1;i<rows.length;i++){
+        const cols = rows[i].split(",").map(c=>c.trim())
+        if(cols.length < 3) continue
+        const [nama, kategori, harga] = cols
+        if(!nama || !harga) continue
+        newMenu.push({ nama, harga:Number(harga) })
+      }
+
+      menu = newMenu
+      storage.saveMenu(menu)
+      renderMenu()
+      alert("Menu berhasil sync dari GitHub")
+    })
+    .catch(err=>{
+      alert("Sync gagal: " + err.message)
+    })
+}
+
+/* =====================
+   BACKUP & RESTORE
+===================== */
+function backupLocal(){
+  const data = {
+    menu: storage.getMenu(),
+    transaksi: storage.getTransaksi()
+  }
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"})
+  const a = document.createElement("a")
+  a.href = URL.createObjectURL(blob)
+  a.download = "cibaicibi-backup.json"
+  a.click()
+}
+
+function restoreLocal(){
+  const f = restoreFile.files[0]
+  if(!f) return
+  const r = new FileReader()
+  r.onload = e=>{
+    const data = JSON.parse(e.target.result)
+    storage.saveMenu(data.menu||[])
+    storage.saveTransaksi(data.transaksi||[])
+    menu = storage.getMenu()
+    renderMenu()
+    alert("Restore selesai")
+  }
+  r.readAsText(f)
+}
