@@ -1,91 +1,59 @@
-/* =====================
-   CONFIG
-===================== */
 const GITHUB_MENU_URL =
 "https://raw.githubusercontent.com/Sismoyoo/cibaicibi/main/menu_sawah.csv"
 
-/* =====================
-   STORAGE (SAFE iOS)
-===================== */
-const store = {
-  get(k){ return JSON.parse(localStorage.getItem(k) || "[]") },
-  set(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+const store={
+  get:k=>JSON.parse(localStorage.getItem(k)||"[]"),
+  set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))
 }
 
-/* =====================
-   DATA
-===================== */
-let menu = []
-let cart = []
+let menu=[],cart=[],chart=null
 
-/* =====================
-   INIT
-===================== */
-window.onload = () => {
-  menu = store.get("menu")
+window.onload=()=>{
+  menu=store.get("menu")
   if(!menu.length) seedMenu()
   renderMenu()
   updateLaporan()
-  if(localStorage.getItem("dark")==="1"){
+  if(localStorage.getItem("dark")==="1")
     document.body.classList.add("dark")
-  }
 }
 
-/* =====================
-   SEED MENU
-===================== */
 function seedMenu(){
-  menu = [
-    { nama:"Ayam Goreng", harga:12000, kategori:"Makanan" },
-    { nama:"Ayam Bakar", harga:15000, kategori:"Makanan" },
-    { nama:"Nasi Goreng", harga:14000, kategori:"Makanan" },
-    { nama:"Es Teh", harga:4000, kategori:"Minuman" }
+  menu=[
+    {nama:"Ayam Goreng",harga:12000,kategori:"Makanan"},
+    {nama:"Es Teh",harga:4000,kategori:"Minuman"}
   ]
   store.set("menu",menu)
 }
 
-/* =====================
-   MENU
-===================== */
+/* MENU */
 function renderMenu(){
-  const key = searchMenu.value.toLowerCase()
-  const kat = filterKategori.value
+  const key=searchMenu.value.toLowerCase()
+  const kat=filterKategori.value
   menuList.innerHTML=""
-
-  menu
-    .filter(m=>{
-      const namaOk = m.nama.toLowerCase().includes(key)
-      const kategori = m.kategori || "Makanan"
-      const kategoriOk = !kat || kategori === kat
-      return namaOk && kategoriOk
-    })
-    .forEach(m=>{
-      const btn = document.createElement("button")
-      btn.className="menu-btn"
-      btn.innerHTML=`
-        ${m.nama}<br>
-        <small>${m.kategori || "Makanan"} • Rp${m.harga}</small>
-      `
-      btn.onclick = () => add(m)
-      menuList.appendChild(btn)
-    })
+  menu.filter(m=>{
+    return m.nama.toLowerCase().includes(key)
+      && (!kat || m.kategori===kat)
+  }).forEach(m=>{
+    const b=document.createElement("button")
+    b.className="menu-btn"
+    b.innerHTML=`${m.nama}<br><small>${m.kategori} • Rp${m.harga}</small>`
+    b.onclick=()=>add(m)
+    menuList.appendChild(b)
+  })
 }
 
-/* =====================
-   CART
-===================== */
+/* CART */
 function add(m){
-  const f = cart.find(i=>i.nama===m.nama)
-  f ? f.qty++ : cart.push({...m, qty:1})
+  const f=cart.find(i=>i.nama===m.nama)
+  f?f.qty++:cart.push({...m,qty:1})
   renderCart()
 }
-
 function renderCart(){
   cartList.innerHTML=""
   let t=0
   cart.forEach((c,i)=>{
-    t += c.qty * c.harga
-    cartList.innerHTML += `
+    t+=c.qty*c.harga
+    cartList.innerHTML+=`
       <div class="cart-item">
         ${c.nama}
         <div class="qty">
@@ -93,134 +61,128 @@ function renderCart(){
           ${c.qty}
           <button onclick="chg(${i},1)">+</button>
         </div>
-      </div>
-    `
+      </div>`
   })
-  total.innerText = t
+  total.innerText=t
 }
-
 function chg(i,d){
-  cart[i].qty += d
-  if(cart[i].qty<=0) cart.splice(i,1)
+  cart[i].qty+=d
+  if(cart[i].qty<=0)cart.splice(i,1)
   renderCart()
 }
 
-/* =====================
-   TRANSAKSI
-===================== */
+/* TRANSAKSI */
 function simpanTransaksi(){
-  if(!cart.length) return
-  const trx = store.get("trx")
-  trx.push({
-    t: Date.now(),
-    items: cart
-  })
-  store.set("trx", trx)
+  if(!cart.length)return
+  const trx=store.get("trx")
+  trx.push({t:Date.now(),items:cart})
+  store.set("trx",trx)
   cart=[]
   renderCart()
   updateLaporan()
-  alert("Transaksi tersimpan")
 }
 
-/* =====================
-   LAPORAN + TOP MENU
-===================== */
+/* LAPORAN + GRAFIK */
 function updateLaporan(){
-  const trx = store.get("trx")
-  const now = Date.now()
-  let h=0, d7=0, d30=0, map={}
+  const trx=store.get("trx")
+  const mulai=tglMulai.value?new Date(tglMulai.value).getTime():0
+  const akhir=tglAkhir.value?new Date(tglAkhir.value).getTime()+86399999:Infinity
 
+  let omzet=0,qty=0,map={},perHari={}
   trx.forEach(t=>{
-    const diff = (now - t.t) / 86400000
-    const sum = t.items.reduce((s,i)=>s+i.qty*i.harga,0)
-    if(diff < 1) h += sum
-    if(diff <= 7) d7 += sum
-    if(diff <= 30) d30 += sum
-
+    if(t.t<mulai||t.t>akhir)return
+    const d=new Date(t.t).toISOString().slice(0,10)
+    perHari[d]=perHari[d]||0
     t.items.forEach(i=>{
-      map[i.nama] = (map[i.nama] || 0) + i.qty
+      omzet+=i.qty*i.harga
+      qty+=i.qty
+      map[i.nama]=(map[i.nama]||0)+i.qty
+      perHari[d]+=i.qty*i.harga
     })
   })
 
-  omzetHari.innerText = h
-  omzet7.innerText = d7
-  omzet30.innerText = d30
+  omzetHari.innerText=omzet
+  totalTerjual.innerText=qty
 
-  topMenu.innerHTML=""
-  Object.entries(map)
-    .sort((a,b)=>b[1]-a[1])
-    .slice(0,5)
-    .forEach(([n,q])=>{
-      topMenu.innerHTML += `<li>${n} (${q})</li>`
-    })
+  menu30Hari.innerHTML=""
+  Object.entries(map).forEach(([n,q])=>{
+    menu30Hari.innerHTML+=`<li>${n} (${q})</li>`
+  })
+
+  renderGrafik(perHari)
 }
 
-/* =====================
-   SYNC GITHUB
-===================== */
-function syncMenuGithub(){
-  if(!confirm("Menu lama akan ditimpa")) return
-  fetch(GITHUB_MENU_URL)
-    .then(r=>r.text())
-    .then(csv=>{
-      const rows = csv.trim().split("\n")
-      menu=[]
-      for(let i=1;i<rows.length;i++){
-        const [n,k,h] = rows[i].split(",")
-        if(n && h){
-          menu.push({
-            nama: n.trim(),
-            harga: Number(h),
-            kategori: (k || "Makanan").trim()
-          })
-        }
-      }
-      store.set("menu",menu)
-      renderMenu()
-      alert("Menu berhasil sync")
-    })
+function renderGrafik(data){
+  const labels=Object.keys(data).sort()
+  const values=labels.map(l=>data[l])
+  if(chart)chart.destroy()
+  chart=new Chart(grafikOmzet,{
+    type:"line",
+    data:{labels,datasets:[{label:"Omzet",data:values}]},
+    options:{responsive:true}
+  })
 }
 
-/* =====================
-   BACKUP & RESTORE
-===================== */
-function backupLocal(){
-  const data={
-    menu: store.get("menu"),
-    trx: store.get("trx")
-  }
+/* CSV */
+function exportCSV(){
+  const trx=store.get("trx")
+  let csv="tanggal,omzet\n"
+  trx.forEach(t=>{
+    const d=new Date(t.t).toISOString().slice(0,10)
+    const s=t.items.reduce((a,i)=>a+i.qty*i.harga,0)
+    csv+=`${d},${s}\n`
+  })
   const a=document.createElement("a")
-  a.href=URL.createObjectURL(
-    new Blob([JSON.stringify(data)],{type:"application/json"})
-  )
-  a.download="cibaicibi-backup.json"
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}))
+  a.download="laporan.csv"
   a.click()
 }
 
+/* SYNC */
+function syncMenuGithub(){
+  fetch(GITHUB_MENU_URL)
+    .then(r=>r.text())
+    .then(csv=>{
+      menu=[]
+      csv.trim().split("\n").slice(1).forEach(r=>{
+        const [n,k,h]=r.split(",")
+        if(n&&h)menu.push({
+          nama:n.trim(),
+          kategori:(k||"Makanan").trim(),
+          harga:+h
+        })
+      })
+      store.set("menu",menu)
+      renderMenu()
+    })
+}
+
+/* BACKUP */
+function backupLocal(){
+  const d={menu:store.get("menu"),trx:store.get("trx")}
+  const a=document.createElement("a")
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(d)],{type:"application/json"}))
+  a.download="backup.json"
+  a.click()
+}
 function restoreLocal(){
-  const f = restoreFile.files[0]
-  if(!f) return
+  const f=restoreFile.files[0]
+  if(!f)return
   const r=new FileReader()
   r.onload=e=>{
     const d=JSON.parse(e.target.result)
-    store.set("menu", d.menu||[])
-    store.set("trx", d.trx||[])
-    menu = store.get("menu")
+    store.set("menu",d.menu||[])
+    store.set("trx",d.trx||[])
+    menu=store.get("menu")
     renderMenu()
     updateLaporan()
-    alert("Restore selesai")
   }
   r.readAsText(f)
 }
 
-/* =====================
-   DARK MODE
-===================== */
+/* DARK MODE */
 function toggleDark(){
   document.body.classList.toggle("dark")
-  localStorage.setItem(
-    "dark",
-    document.body.classList.contains("dark")?"1":"0"
-  )
+  localStorage.setItem("dark",document.body.classList.contains("dark")?"1":"0")
 }
 window.onload = init
