@@ -61,7 +61,6 @@ body.dark .panel{background:#1e1e1e}
   flex:1;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-  min-height:0;
 }
 .menu-grid{
   display:grid;
@@ -77,8 +76,8 @@ body.dark .panel{background:#1e1e1e}
 }
 body.dark .menu-btn{
   background:#2a2a2a;
-  border-color:#333;
   color:#eee;
+  border-color:#333;
 }
 .menu-btn:active{background:#2E7D32;color:#fff}
 
@@ -87,50 +86,34 @@ body.dark .menu-btn{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:8px;
-}
-.qty button{
-  width:28px;height:28px;
-  border-radius:50%;
-  border:none;
-  background:#ccc;
-  font-size:18px;
-}
-
-/* FOOTER */
-.footer button{
-  width:100%;
-  padding:14px;
-  font-size:16px;
-  border:none;
-  border-radius:12px;
-  background:#2E7D32;
-  color:#fff;
-}
-.total{text-align:right;font-size:22px;font-weight:700}
-
-/* OWNER */
-.owner{
-  margin-top:10px;
-  border-top:1px dashed #ccc;
-  padding-top:10px;
-}
-.owner button{
-  background:#455A64;
-  color:#fff;
   margin-bottom:6px;
 }
-input,select{
+.qty button{
+  width:28px;height:28px;border-radius:50%;
+  border:none;background:#ccc;font-size:18px;
+}
+
+/* FORM */
+input,select,button{
   width:100%;
   padding:10px;
   border-radius:10px;
   border:1px solid #ccc;
   margin-bottom:6px;
 }
-body.dark input,body.dark select{
-  background:#2a2a2a;
-  color:#eee;
-  border-color:#333;
+button{
+  background:#2E7D32;
+  color:#fff;
+  border:none;
+}
+.owner button{background:#455A64}
+
+/* TOTAL */
+.total{
+  text-align:right;
+  font-size:22px;
+  font-weight:700;
+  margin:6px 0;
 }
 </style>
 </head>
@@ -159,23 +142,29 @@ body.dark input,body.dark select{
     </div>
   </div>
 
-  <!-- CART + OWNER -->
+  <!-- CART & LAPORAN -->
   <div class="panel">
     <div id="cartList"></div>
     <div class="total">Rp <span id="total">0</span></div>
 
-    <div class="footer">
-      <button onclick="simpanTransaksi()">SIMPAN</button>
-    </div>
+    <button onclick="simpanTransaksi()">SIMPAN</button>
 
     <div class="owner">
-      <b>📊 Laporan</b><br>
-      Hari ini: Rp <span id="omzetHari">0</span><br>
-      7 hari: Rp <span id="omzet7">0</span><br>
-      30 hari: Rp <span id="omzet30">0</span>
+      <b>📅 Filter Tanggal</b>
+      <input type="date" id="tglMulai">
+      <input type="date" id="tglAkhir">
+      <button onclick="updateLaporan()">Terapkan</button>
+      <button onclick="exportCSV()">Export CSV</button>
 
-      <b>🏆 Top Menu</b>
-      <ul id="topMenu"></ul>
+      <b>📊 Laporan</b>
+      <div>Total Penjualan: Rp <span id="omzetHari">0</span></div>
+      <div>Total Menu Terjual: <span id="totalTerjual">0</span></div>
+
+      <b>📦 Penjualan Menu</b>
+      <ul id="menu30Hari"></ul>
+
+      <b>📈 Grafik Omzet</b>
+      <canvas id="grafikOmzet" height="180"></canvas>
 
       <button onclick="syncMenuGithub()">Sync Menu GitHub</button>
       <button onclick="backupLocal()">Backup</button>
@@ -186,6 +175,7 @@ body.dark input,body.dark select{
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
