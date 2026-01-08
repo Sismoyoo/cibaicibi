@@ -90,8 +90,11 @@ body.dark .menu-btn{
   margin-bottom:8px;
 }
 .qty button{
-  width:28px;height:28px;border-radius:50%;
-  border:none;background:#ccc;font-size:18px;
+  width:28px;height:28px;
+  border-radius:50%;
+  border:none;
+  background:#ccc;
+  font-size:18px;
 }
 
 /* FOOTER */
@@ -112,9 +115,23 @@ body.dark .menu-btn{
   border-top:1px dashed #ccc;
   padding-top:10px;
 }
-.owner button{background:#455A64;margin-bottom:6px}
-input{width:100%;padding:10px;border-radius:10px;border:1px solid #ccc}
-body.dark input{background:#2a2a2a;color:#eee;border-color:#333}
+.owner button{
+  background:#455A64;
+  color:#fff;
+  margin-bottom:6px;
+}
+input,select{
+  width:100%;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  margin-bottom:6px;
+}
+body.dark input,body.dark select{
+  background:#2a2a2a;
+  color:#eee;
+  border-color:#333;
+}
 </style>
 </head>
 
@@ -128,19 +145,21 @@ body.dark input{background:#2a2a2a;color:#eee;border-color:#333}
 <div class="app">
 
   <!-- MENU -->
-  <select id="filterKategori" onchange="renderMenu()">
-  <option value="">Semua</option>
-  <option value="Makanan">Makanan</option>
-  <option value="Minuman">Minuman</option>
-</select>
   <div class="panel">
-    <input id="search" placeholder="🔍 Cari menu..." oninput="renderMenu()">
+    <select id="filterKategori" onchange="renderMenu()">
+      <option value="">Semua Kategori</option>
+      <option value="Makanan">Makanan</option>
+      <option value="Minuman">Minuman</option>
+    </select>
+
+    <input id="searchMenu" placeholder="🔍 Cari menu..." oninput="renderMenu()">
+
     <div class="menu-scroll">
       <div id="menuList" class="menu-grid"></div>
     </div>
   </div>
 
-  <!-- CART -->
+  <!-- CART + OWNER -->
   <div class="panel">
     <div id="cartList"></div>
     <div class="total">Rp <span id="total">0</span></div>
@@ -150,10 +169,10 @@ body.dark input{background:#2a2a2a;color:#eee;border-color:#333}
     </div>
 
     <div class="owner">
-      <b>📊 Laporan</b>
-      <div>Hari ini: Rp <span id="omzetHari">0</span></div>
-      <div>7 hari: Rp <span id="omzet7">0</span></div>
-      <div>30 hari: Rp <span id="omzet30">0</span></div>
+      <b>📊 Laporan</b><br>
+      Hari ini: Rp <span id="omzetHari">0</span><br>
+      7 hari: Rp <span id="omzet7">0</span><br>
+      30 hari: Rp <span id="omzet30">0</span>
 
       <b>🏆 Top Menu</b>
       <ul id="topMenu"></ul>
