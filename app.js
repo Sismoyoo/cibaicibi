@@ -82,11 +82,17 @@ function tambahKeCart(item){
 }
 
 function renderCart(){
-  cartList.innerHTML=""
-  let total=0
+  const cartListEl = document.getElementById("cartList")
+  const totalEl = document.getElementById("total")
+
+  if(!cartListEl || !totalEl) return
+
+  cartListEl.innerHTML = ""
+  let total = 0
+
   cart.forEach((c,i)=>{
-    total+=c.qty*c.harga
-    cartList.innerHTML+=`
+    total += c.qty * c.harga
+    cartListEl.innerHTML += `
       <div class="cart-item">
         <div>${c.nama}</div>
         <div class="qty">
@@ -185,3 +191,4 @@ function restoreLocal(){
   }
   r.readAsText(f)
 }
+window.onload = init
