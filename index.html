@@ -128,6 +128,11 @@ body.dark input{background:#2a2a2a;color:#eee;border-color:#333}
 <div class="app">
 
   <!-- MENU -->
+  <select id="filterKategori" onchange="renderMenu()">
+  <option value="">Semua</option>
+  <option value="Makanan">Makanan</option>
+  <option value="Minuman">Minuman</option>
+</select>
   <div class="panel">
     <input id="search" placeholder="🔍 Cari menu..." oninput="renderMenu()">
     <div class="menu-scroll">
