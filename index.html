@@ -3,247 +3,170 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cibaicibi POS</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2E7D32">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>Cibaicibi POS – Phase 1</title>
 
 <style>
-:root{
-  --primary:#2E7D32;
-  --bg:#f4f4f4;
-  --card:#ffffff;
-  --border:#e0e0e0;
-}
+/* ===== RESET & BASE ===== */
 *{box-sizing:border-box}
-body{
+html, body{
   margin:0;
+  padding:0;
+  height:100%;
   font-family:-apple-system,BlinkMacSystemFont,Arial;
-  background:var(--bg);
+  background:#f4f4f4;
 }
+
+/* ===== HEADER ===== */
 header{
-  position:sticky;
-  top:0;
-  z-index:10;
-  background:var(--card);
-  padding:14px;
+  height:56px;
+  background:#ffffff;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
   font-size:20px;
   font-weight:700;
-  border-bottom:1px solid var(--border);
-}
-#darkToggle{
-  float:right;
-  background:none;
-  border:none;
-  font-size:20px;
 }
 
-/* LAYOUT */
-.app{display:flex;gap:10px;padding:10px;height:calc(100vh - 60px)}
-@media(orientation:portrait){.app{flex-direction:column}}
-@media(orientation:landscape){.app{flex-direction:row}}
+/* ===== APP LAYOUT ===== */
+.app{
+  height:calc(100% - 56px);
+  display:flex;
+  gap:10px;
+  padding:10px;
+  min-height:0; /* 🔥 WAJIB */
+}
 
+/* Portrait */
+@media (orientation:portrait){
+  .app{flex-direction:column;}
+}
+
+/* Landscape */
+@media (orientation:landscape){
+  .app{flex-direction:row;}
+}
+
+/* ===== PANEL ===== */
 .panel{
-  background:var(--card);
-  border-radius:16px;
+  background:#ffffff;
+  border-radius:14px;
   padding:12px;
   flex:1;
+
   display:flex;
   flex-direction:column;
+  min-height:0; /* 🔥 WAJIB */
 }
 
-/* INPUT */
-input,button{
-  width:100%;
-  padding:12px;
-  font-size:16px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  margin-top:6px;
-}
-button{
-  background:var(--primary);
-  color:#fff;
-  border:none;
+/* ===== MENU AREA ===== */
+.menu-header{
+  font-weight:700;
+  margin-bottom:8px;
 }
 
-/* MENU GRID + SCROLL */
 .menu-scroll{
   flex:1;
   overflow-y:auto;
-  margin-top:8px;
-  padding-right:4px;
   -webkit-overflow-scrolling:touch;
+  border:1px solid #eee;
+  border-radius:10px;
+  padding:8px;
+  min-height:0; /* 🔥 WAJIB */
 }
-.menu-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:10px;
-}
-.group-title{
-  grid-column:1/-1;
-  font-size:13px;
-  font-weight:700;
-  color:#555;
-  margin-top:12px;
-}
-.menu-btn{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:16px;
+
+.menu-item{
   padding:12px;
-  text-align:center;
-}
-.menu-btn.active{
-  background:var(--primary);
-  color:#fff;
-}
-.menu-btn small{
-  display:block;
-  font-size:12px;
-  opacity:.7;
+  border-bottom:1px solid #eee;
 }
 
-/* BADGE */
-.badge{
-  display:inline-block;
-  padding:2px 8px;
-  border-radius:999px;
-  font-size:11px;
+.menu-item:last-child{
+  border-bottom:none;
 }
-.badge.makanan{background:#FFE0B2}
-.badge.minuman{background:#BBDEFB}
 
-/* CART */
-#keranjangList{list-style:none;padding:0;margin:0}
-#keranjangList li{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+/* ===== CART ===== */
+.cart-header{
+  font-weight:700;
   margin-bottom:8px;
 }
-.qty{display:flex;gap:6px;align-items:center}
-.qty-btn{
-  width:28px;height:28px;
-  border-radius:50%;
-  background:#eee;color:#000;font-size:18px;padding:0
-}
-.del{
-  background:#ffebee;
-  color:#c62828;
-  padding:6px 10px;
-  border-radius:8px;
+
+.cart-area{
+  flex:1;
+  border:1px dashed #ccc;
+  border-radius:10px;
+  padding:8px;
 }
 
-/* TOTAL */
-.total{
-  font-size:26px;
-  font-weight:800;
-  color:var(--primary);
-  text-align:right;
-  margin-top:10px;
-}
-.save-btn{
-  font-size:20px;
-  padding:16px;
-  border-radius:16px;
+/* ===== FOOTER BUTTON ===== */
+.footer{
   margin-top:10px;
 }
 
-/* LAPORAN */
-.box{
-  background:var(--card);
-  margin:10px;
-  padding:12px;
-  border-radius:16px;
-}
-
-/* TOAST */
-#popup{
-  display:none;
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:var(--primary);
+.footer button{
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  background:#2E7D32;
   color:#fff;
-  padding:12px 20px;
-  border-radius:999px;
-}
-
-/* DARK MODE */
-body.dark{
-  --bg:#121212;
-  --card:#1e1e1e;
-  --border:#333;
-  --primary:#81C784;
-  color:#eee;
-}
-body.dark input{
-  background:#1e1e1e;
-  color:#eee;
-  border:1px solid #333;
-}
-body.dark .menu-btn{
-  background:#2a2a2a;
-  color:#eee;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  🍽️ Cibaicibi POS
-  <button id="darkToggle" onclick="toggleDark()">🌙</button>
-</header>
+<header>🍽️ Cibaicibi POS</header>
 
 <div class="app">
 
-  <!-- MENU -->
-  <div class="panel menu-panel">
-    <input id="searchMenu" placeholder="🔍 Cari menu..." oninput="renderMenu()">
+  <!-- MENU PANEL -->
+  <div class="panel">
+    <div class="menu-header">📋 Daftar Menu</div>
 
     <div class="menu-scroll">
-      <div id="menuList" class="menu-grid"></div>
+      <!-- Dummy menu panjang (buat test scroll) -->
+      <div class="menu-item">Ayam Goreng</div>
+      <div class="menu-item">Ayam Bakar</div>
+      <div class="menu-item">Ayam Rica Rica</div>
+      <div class="menu-item">Ayam Woku</div>
+      <div class="menu-item">Ayam Geprek</div>
+      <div class="menu-item">Ayam Kuluyuk</div>
+      <div class="menu-item">Nasi Goreng</div>
+      <div class="menu-item">Nasi Goreng Spesial</div>
+      <div class="menu-item">Nasi Goreng Seafood</div>
+      <div class="menu-item">Mie Goreng</div>
+      <div class="menu-item">Mie Rebus</div>
+      <div class="menu-item">Capcay</div>
+      <div class="menu-item">Sapo Tahu</div>
+      <div class="menu-item">Es Teh</div>
+      <div class="menu-item">Es Jeruk</div>
+      <div class="menu-item">Kopi Hitam</div>
+      <div class="menu-item">Teh Panas</div>
+      <div class="menu-item">Air Mineral</div>
+      <div class="menu-item">Es Campur</div>
+      <div class="menu-item">Es Dawet</div>
+      <div class="menu-item">Juice Alpukat</div>
+      <div class="menu-item">Juice Mangga</div>
+      <div class="menu-item">Juice Jambu</div>
+      <div class="menu-item">Soda Gembira</div>
     </div>
 
-    <input id="qty" type="number" placeholder="Qty">
-    <button onclick="tambahKeKeranjang()">➕ Tambah</button>
   </div>
 
-  <!-- CART -->
+  <!-- CART PANEL -->
   <div class="panel">
-    <h3>🛒 Keranjang</h3>
-    <ul id="keranjangList"></ul>
-    <div class="total">Rp <span id="totalAll">0</span></div>
-    <button class="save-btn" onclick="simpanTransaksi()">💾 SIMPAN</button>
+    <div class="cart-header">🛒 Keranjang</div>
+    <div class="cart-area">
+      (belum ada logic)
+    </div>
+
+    <div class="footer">
+      <button>SIMPAN</button>
+    </div>
   </div>
 
 </div>
 
-<div class="box">
-  <h3>📊 Laporan</h3>
-  <p>Omzet 30 Hari: <b>Rp <span id="omzet30">0</span></b></p>
-  <canvas id="chart7"></canvas>
-</div>
-
-<div class="box">
-  <h3>☁️ Backup & Sync</h3>
-  <button onclick="backupLocal()">Backup Local</button>
-  <input type="file" id="restoreFile">
-  <button onclick="restoreLocal()">Restore</button>
-  <button onclick="syncMenuGithub()">Sync Menu GitHub</button>
-</div>
-
-<div id="popup">✔</div>
-
-<script src="app.js"></script>
-<script>
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js")
-}
-</script>
 </body>
 </html>
