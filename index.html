@@ -12,17 +12,17 @@ html,body{
   font-family:-apple-system,BlinkMacSystemFont,Arial;
   background:#f4f4f4;
 }
+
+/* ===== FILTER MENU ===== */
 .menu-filter{
   display:flex;
   gap:6px;
   margin-bottom:6px;
 }
-.menu-filter select{
-  flex:1;
-}
-.menu-filter input{
-  flex:2;
-}
+.menu-filter select{flex:1}
+.menu-filter input{flex:2}
+
+/* ===== LAPORAN SCROLL ===== */
 .laporan-scroll{
   overflow-y:auto;
   max-height:260px;
@@ -36,23 +36,17 @@ html,body{
 .owner li{
   font-size:14px;
 }
-/* ===== DAY MODE MENU TEXT FIX ===== */
-body:not(.dark) .menu-btn{
-  color:#000;
-}
 
+/* ===== DAY MODE MENU TEXT FIX ===== */
+body:not(.dark) .menu-btn,
 body:not(.dark) .menu-btn small{
   color:#000;
 }
 
-body:not(.dark) .menu-btn b,
-body:not(.dark) .menu-btn span{
-  color:#000;
-}
-
+/* ===== DARK MODE ===== */
 body.dark{background:#121212;color:#eee}
 
-/* HEADER */
+/* ===== HEADER ===== */
 header{
   height:56px;
   background:#fff;
@@ -71,7 +65,7 @@ header button{
   font-size:20px;
 }
 
-/* APP */
+/* ===== APP ===== */
 .app{
   height:calc(100% - 56px);
   display:flex;
@@ -82,7 +76,7 @@ header button{
 @media (orientation:portrait){.app{flex-direction:column}}
 @media (orientation:landscape){.app{flex-direction:row}}
 
-/* PANEL */
+/* ===== PANEL ===== */
 .panel{
   background:#fff;
   border-radius:14px;
@@ -94,7 +88,7 @@ header button{
 }
 body.dark .panel{background:#1e1e1e}
 
-/* MENU */
+/* ===== MENU ===== */
 .menu-scroll{
   flex:1;
   overflow-y:auto;
@@ -117,9 +111,12 @@ body.dark .menu-btn{
   color:#eee;
   border-color:#333;
 }
-.menu-btn:active{background:#2E7D32;color:#fff}
+.menu-btn:active{
+  background:#2E7D32;
+  color:#fff;
+}
 
-/* CART */
+/* ===== CART ===== */
 .cart-item{
   display:flex;
   justify-content:space-between;
@@ -127,11 +124,15 @@ body.dark .menu-btn{
   margin-bottom:6px;
 }
 .qty button{
-  width:28px;height:28px;border-radius:50%;
-  border:none;background:#ccc;font-size:18px;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:none;
+  background:#ccc;
+  font-size:18px;
 }
 
-/* FORM */
+/* ===== FORM ===== */
 input,select,button{
   width:100%;
   padding:10px;
@@ -146,31 +147,21 @@ button{
 }
 .owner button{background:#455A64}
 
-/* TOTAL */
+/* ===== TOTAL ===== */
 .total{
   text-align:right;
   font-size:22px;
   font-weight:700;
   margin:6px 0;
 }
-  /* ===== MOBILE UX FIX ===== */
+
+/* ===== MOBILE UX FIX ===== */
 @media (orientation:portrait){
-  .app{
-    flex-direction:column;
-    gap:6px;
-  }
+  .app{gap:6px}
 
-  /* Menu lebih besar */
-  .panel.menu-panel{
-    flex:0 0 65%;
-  }
+  .panel.menu-panel{flex:0 0 65%}
+  .panel.cart-panel{flex:0 0 35%}
 
-  /* Kasir lebih kecil */
-  .panel.cart-panel{
-    flex:0 0 35%;
-  }
-
-  /* Tombol simpan sticky */
   .save-bar{
     position:sticky;
     bottom:0;
@@ -178,10 +169,7 @@ button{
     padding-top:6px;
   }
 
-  /* Grafik diperkecil */
-  canvas{
-    max-height:140px;
-  }
+  canvas{max-height:140px}
 }
 </style>
 </head>
@@ -198,14 +186,13 @@ button{
   <!-- MENU -->
   <div class="panel menu-panel">
     <div class="menu-filter">
-  <select id="filterKategori" onchange="renderMenu()">
-    <option value="">Semua</option>
-    <option value="Makanan">Makanan</option>
-    <option value="Minuman">Minuman</option>
-  </select>
-
-  <input id="searchMenu" placeholder="🔍 Cari..." oninput="renderMenu()">
-</div>
+      <select id="filterKategori" onchange="renderMenu()">
+        <option value="">Semua</option>
+        <option value="Makanan">Makanan</option>
+        <option value="Minuman">Minuman</option>
+      </select>
+      <input id="searchMenu" placeholder="🔍 Cari..." oninput="renderMenu()">
+    </div>
 
     <div class="menu-scroll">
       <div id="menuList" class="menu-grid"></div>
@@ -218,8 +205,8 @@ button{
     <div class="total">Rp <span id="total">0</span></div>
 
     <div class="save-bar">
-  <button onclick="simpanTransaksi()">SIMPAN</button>
-</div>
+      <button onclick="simpanTransaksi()">SIMPAN</button>
+    </div>
 
     <div class="owner laporan-scroll">
       <b>📅 Filter Tanggal</b>
